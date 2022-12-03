@@ -3,7 +3,7 @@ import duration from 'dayjs/plugin/duration';
 import timezone from 'dayjs/plugin/timezone';
 import { Duration } from './Activity';
 const timeZone = 'Australia/Melbourne'; //GMT+11
-const timeFormat = 'YYYY-MM-DDTHH:mm:ssZ[Z]';
+const timeFormat = 'YYYY-MM-DDTHH:mm:ssZ';
 //const timeZone = 'Asia/Colombo'
 
 dayjs.extend(duration);
@@ -37,5 +37,22 @@ export function msToReadable(durationMs: number) {
 }
 
 export function dateToMs(date: string) {
-  return dayjs(date).valueOf();
+  return dayjs(date).unix();
+}
+
+export function dateToLocalDate(date: string) {
+  return dayjs(date).toDate();
+}
+
+export function getDurationFromMs(durationMs: number): Duration {
+  const durationObj = dayjs.duration(durationMs, 'millisecond');
+  const days = durationObj.asDays();
+  const hours = durationObj.subtract(days, 'day').asHours();
+  const minutes = durationObj.subtract(days, 'day').subtract(hours, 'hour').asMinutes();
+
+  return {
+    days: days,
+    hours: hours,
+    minutes: minutes,
+  };
 }

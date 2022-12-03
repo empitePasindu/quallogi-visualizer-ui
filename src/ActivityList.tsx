@@ -8,8 +8,8 @@ const ActivityItem = (props: { activity: Activity }) => {
   return (
     <div className="col bg-border">
       <div className="row">
-        <div className="col-2 bg-border">id</div>
-        <div className="col-10 bg-border">date</div>
+        <div className="col-2 bg-border">{props.activity.id}</div>
+        <div className="col-10 bg-border">{props.activity.startTime}</div>
       </div>
     </div>
   );

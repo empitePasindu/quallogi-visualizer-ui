@@ -3,6 +3,9 @@ import { Formik } from 'formik';
 import DatePicker from 'react-datepicker';
 import * as Yup from 'yup';
 import 'react-datepicker/dist/react-datepicker.css';
+import { Activity, ActivityType } from './Activity';
+import { useEffect, useState } from 'react';
+import { dateToLocalDate, getDurationFromMs, nowTime } from './dateUtils';
 
 type DatePickerProps = {
   name: any;
@@ -15,8 +18,16 @@ export interface ActivityFormData {
   days: number;
   hours: number;
   minutes: number;
-  type: number;
+  type: string;
 }
+
+const defaultFormData: ActivityFormData = {
+  startDate: new Date(),
+  days: 0,
+  hours: 0,
+  minutes: 0,
+  type: 'work',
+};
 
 const validationSchema = Yup.object().shape({
   startDate: Yup.date(),
@@ -29,6 +40,8 @@ const validationSchema = Yup.object().shape({
 const DatePickerField = ({ name, value, onChange, disabled }: DatePickerProps) => {
   return (
     <DatePicker
+      showTimeSelect
+      dateFormat="Pp"
       disabled={disabled}
       selected={(value && new Date(value)) || null}
       onChange={(val) => {
@@ -38,24 +51,28 @@ const DatePickerField = ({ name, value, onChange, disabled }: DatePickerProps) =
   );
 };
 
-export const ActivityForm = (props: { disableDateEdit: boolean; onSubmit: (data: ActivityFormData) => void }) => {
+export const ActivityForm = (props: { disableDateEdit: boolean; activity?: Activity; reset: boolean; onSubmit: (data: ActivityFormData) => void }) => {
+  const [formData, setFormData] = useState<ActivityFormData>({ startDate: new Date(), days: 0, hours: 0, minutes: 0, type: 'work' });
+
+  useEffect(() => {
+    if (props.activity) {
+      setFormData({ ...getDurationFromMs(props.activity.duration), startDate: dateToLocalDate(props.activity.startTime), type: props.activity.type });
+    } else {
+      setFormData({ ...defaultFormData });
+    }
+  }, [props.activity]);
+
+  useEffect(() => {
+    setFormData({ ...defaultFormData });
+  }, [props.reset]);
+
   const onDataSubmit = (data: any) => {
     console.log('got data', data);
     props.onSubmit(data);
   };
 
   return (
-    <Formik
-      initialValues={{
-        startDate: Date(),
-        days: 0,
-        hours: 0,
-        minutes: 0,
-        type: 'work',
-      }}
-      onSubmit={onDataSubmit}
-      validationSchema={validationSchema}
-    >
+    <Formik enableReinitialize={true} initialValues={formData} onSubmit={onDataSubmit} validationSchema={validationSchema}>
       {({ values, errors, touched, handleChange, handleBlur, isSubmitting, setFieldValue, handleSubmit }) => (
         <Form>
           <Form.Group className="row mb-3">

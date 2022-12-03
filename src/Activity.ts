@@ -1,8 +1,8 @@
 import * as du from './dateUtils';
 
 export enum ActivityType {
-  rest = 0,
-  work = 1,
+  rest = 'rest',
+  work = 'work',
 }
 
 export interface Duration {
@@ -37,7 +37,7 @@ export class Activity implements IActivity {
     this.type = activity.type;
     this.duration = activity.duration ? activity.duration : 0;
     if (activity.endTime) this.endTime = activity.endTime;
-    else this.endTime = du.toDateString(activity.duration ? du.addMilliSecondsToDate(activity.startTime, activity.duration) : du.nowTime());
+    else this.endTime = activity.duration ? du.toDateString(du.addMilliSecondsToDate(activity.startTime, activity.duration)) : this.startTime;
 
     this.startTimeMs = du.dateToMs(this.startTime);
     this.endTimeMs = du.dateToMs(this.endTime);
@@ -45,7 +45,8 @@ export class Activity implements IActivity {
   }
 
   public static fromOffestDuration(id: number, startTime: string, type: ActivityType, duration: Duration = { days: 0, hours: 0, minutes: 0 }): Activity {
-    const newStartTime = du.toDateString(du.addDurationToDate(startTime, duration));
-    return new Activity({ id: id, startTime: newStartTime, type: type });
+    const endTime = du.toDateString(du.addDurationToDate(startTime, duration));
+    const durationMs = du.timeDiff(startTime, endTime);
+    return new Activity({ id: id, startTime: startTime, type: type, duration: durationMs, endTime: endTime });
   }
 }
