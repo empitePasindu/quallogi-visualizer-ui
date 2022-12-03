@@ -5,6 +5,11 @@ export enum ActivityType {
   work = 1,
 }
 
+export interface Duration {
+  days: number;
+  hours: number;
+  minutes: number;
+}
 export interface IActivity {
   id: number;
   startTime: string;
@@ -39,8 +44,8 @@ export class Activity implements IActivity {
     this.durationStr = du.msToReadable(this.duration);
   }
 
-  public static fromOffestDuration(id: number, startTime: string, type: ActivityType, days = 0, hours = 0, minutes = 0): Activity {
-    const newStartTime = du.toDateString(du.addDurationToDate(startTime, days, hours, minutes));
+  public static fromOffestDuration(id: number, startTime: string, type: ActivityType, duration: Duration = { days: 0, hours: 0, minutes: 0 }): Activity {
+    const newStartTime = du.toDateString(du.addDurationToDate(startTime, duration));
     return new Activity({ id: id, startTime: newStartTime, type: type });
   }
 }

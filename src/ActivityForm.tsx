@@ -10,7 +10,7 @@ type DatePickerProps = {
   onChange: any;
   disabled: any;
 };
-interface ActivityFormData {
+export interface ActivityFormData {
   startDate: Date;
   days: number;
   hours: number;
@@ -48,9 +48,9 @@ export const ActivityForm = (props: { disableDateEdit: boolean; onSubmit: (data:
     <Formik
       initialValues={{
         startDate: Date(),
-        days: '',
-        hours: '',
-        minutes: '',
+        days: 0,
+        hours: 0,
+        minutes: 0,
         type: 'work',
       }}
       onSubmit={onDataSubmit}
@@ -68,33 +68,62 @@ export const ActivityForm = (props: { disableDateEdit: boolean; onSubmit: (data:
             <Form.Label className="col-sm-2 col-form-label">Duration</Form.Label>
             <div className="col-sm-10">
               <div className="row">
-                <Form.Control
-                  name="days"
-                  type="text"
-                  className={'col ' + (touched.days && errors.days ? ' error' : '')}
-                  placeholder="Days"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.days}
-                />
-                <Form.Control
-                  name="hours"
-                  type="text"
-                  className={'col ' + (touched.hours && errors.hours ? ' error' : '')}
-                  placeholder="Hours"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.hours}
-                />
-                <Form.Control
-                  name="minutes"
-                  type="text"
-                  className={'col ' + (touched.minutes && errors.minutes ? ' error' : '')}
-                  placeholder="Minutes"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.minutes}
-                />
+                <div className="col">
+                  <div className="row w-100">
+                    <div className="col-2">
+                      <Form.Label>days</Form.Label>
+                    </div>
+                    <div className="col-10">
+                      <Form.Control
+                        name="days"
+                        type="number"
+                        className={touched.days && errors.days ? ' error' : ''}
+                        placeholder="Days"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        value={values.days}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col">
+                  <div className="row w-100">
+                    <div className="col-2">
+                      <Form.Label>Hours</Form.Label>
+                    </div>
+                    <div className="col-10">
+                      <Form.Control
+                        name="hours"
+                        type="number"
+                        className={touched.hours && errors.hours ? ' error' : ''}
+                        placeholder="Hours"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        value={values.hours}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col">
+                  <div className="row w-100">
+                    <div className="col-2">
+                      <Form.Label>Minutes</Form.Label>
+                    </div>
+                    <div className="col-10">
+                      <Form.Control
+                        name="minutes"
+                        type="number"
+                        className={touched.minutes && errors.minutes ? ' error' : ''}
+                        placeholder="Minutes"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        value={values.minutes}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </Form.Group>
