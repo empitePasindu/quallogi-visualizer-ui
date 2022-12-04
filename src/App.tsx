@@ -143,9 +143,11 @@ function App() {
     if (result) {
       setBreachResult(result);
       setBreachCounters(
-        result.breached.map((breached, idx) => {
-          return RuleBreachCounter.fromBreached(idx, breached);
-        }),
+        result.breached
+          .sort((a, b) => a.startPoint - b.startPoint)
+          .map((breached, idx) => {
+            return RuleBreachCounter.fromBreached(idx, breached);
+          }),
       );
     }
     setLoading(false);
@@ -209,7 +211,13 @@ function App() {
         </div>
         <div className="row">
           <div className="col bg-border">
-            <ActivityTimeline activities={activities} selectedActivity={selectedActivity} breachResult={breachResult} onActivitySelect={updateSelectedActivity} />
+            <ActivityTimeline
+              activities={activities}
+              selectedActivity={selectedActivity}
+              breachCounters={breachCounters}
+              onActivitySelect={updateSelectedActivity}
+              onCounterSelect={updateSelectedCounter}
+            />
           </div>
         </div>
       </div>

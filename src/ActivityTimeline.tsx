@@ -6,10 +6,11 @@ import { Activity, ActivityType } from './Activity';
 import { useEffect, useState } from 'react';
 import ReactCalendarTimeline from 'react-calendar-timeline';
 import { BreachResult } from './service/FatigueApi';
+import { RuleBreachCounter, RuleType } from './RuleBreachCounter';
 
 const groups = [
   { id: 1, title: 'activities' },
-  { id: 2, title: 'breaches' },
+  { id: 2, title: '14 Day' },
 ];
 
 /** 
@@ -47,16 +48,17 @@ interface TimeLineActivity {
 
 export const ActivityTimeline = (props: {
   activities: Activity[];
-  breachResult: BreachResult | undefined;
+  breachCounters: RuleBreachCounter[];
   selectedActivity: Activity | undefined;
   onActivitySelect: (activity: Activity) => void;
+  onCounterSelect: (counter: RuleBreachCounter) => void;
 }) => {
   const [tLActivites, setTlActivities] = useState<TimeLineActivity[]>([]);
   const [startActivity, setStartActivity] = useState<TimeLineActivity>();
   const [endActivity, setEndActivity] = useState<TimeLineActivity>();
 
   useEffect(() => {
-    const newTlActivities = props.activities.map((act): TimeLineActivity => {
+    let newTlActivities = props.activities.map((act): TimeLineActivity => {
       return {
         id: act.id + 1,
         group: 1,
@@ -71,23 +73,44 @@ export const ActivityTimeline = (props: {
       };
     });
 
-    if (props.breachResult) newTlActivities.concat(mapBreachResults(props.breachResult));
+    if (props.breachCounters) {
+      newTlActivities = newTlActivities.concat(mapBreachResults(props.breachCounters));
+    }
 
     setTlActivities(newTlActivities);
     setStartActivity(newTlActivities[0]);
     setEndActivity(newTlActivities[newTlActivities.length - 1]);
-  }, [props.activities, props.breachResult]);
+  }, [props.activities, props.breachCounters]);
 
-  const mapBreachResults = (breachResult: BreachResult): TimeLineActivity[] => {
-    const tlActivities: TimeLineActivity[] = [];
-    breachResult.resultSet.forEach((rule) => {});
+  const mapBreachResults = (breachCounters: RuleBreachCounter[]): TimeLineActivity[] => {
+    const tlActivities: TimeLineActivity[] = breachCounters
+      .filter((c) => c.mainRule === RuleType.Day14)
+      .map((counter) => {
+        return {
+          id: counter.id + 1000,
+          group: 2,
+          title: counter.subRule.split('>>')[0],
+          start_time: moment(counter.startTime),
+          end_time: moment(counter.endTime),
+          itemProps: {
+            style: {
+              'background-color': counter.type === ActivityType.rest ? 'blue' : 'orange',
+            },
+          },
+        };
+      });
     return tlActivities;
   };
 
   const onActivitySelect = (id: number) => {
     console.log('selectedTimeplineActivityId', id);
-    const activity = props.activities.find((act) => act.id === id - 1);
-    if (activity) props.onActivitySelect(activity);
+    if (id < 1000) {
+      const activity = props.activities.find((act) => act.id === id - 1);
+      if (activity) props.onActivitySelect(activity);
+    } else {
+      const counter = props.breachCounters.find((act) => act.id === id - 1000);
+      if (counter) props.onCounterSelect(counter);
+    }
   };
 
   return startActivity && endActivity ? (
@@ -98,6 +121,7 @@ export const ActivityTimeline = (props: {
       defaultTimeEnd={endActivity.end_time.add(2, 'day')}
       canMove={false}
       itemHeightRatio={0.75}
+      stackItems
       onItemSelect={onActivitySelect}
     />
   ) : (
