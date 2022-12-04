@@ -1,4 +1,5 @@
 import { Activity, ActivityType } from './Activity';
+import { toSimpleDateString } from './dateUtils';
 
 type ActivityProps = {
   activities: Activity[];
@@ -15,7 +16,7 @@ const ActivityItem = (props: { activity: Activity; onClick: (activity: Activity)
     >
       <div className="row" style={{ backgroundColor: props.activity.selected ? 'lightblue' : '' }}>
         <div className="col-1 bg-border">{props.activity.id}</div>
-        <div className="col-7 bg-border">{props.activity.startTime}</div>
+        <div className="col-7 bg-border">{toSimpleDateString(props.activity.startTime)}</div>
         <div className="col-2 bg-border" style={{ backgroundColor: props.activity.type === ActivityType.rest ? 'lightgreen' : 'lightyellow' }}>
           {props.activity.type}
         </div>

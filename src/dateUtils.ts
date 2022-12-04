@@ -6,6 +6,8 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import { Duration } from './Activity';
 const timeZone = 'Australia/Melbourne'; //GMT+11
 const timeFormat = 'YYYY-MM-DDTHH:mm:ssZ';
+const timeFormatSimple = 'DD/MM HH:mm';
+
 //const timeZone = 'Asia/Colombo'
 dayjs.extend(timezone);
 dayjs.tz.setDefault(timeZone);
@@ -18,6 +20,10 @@ export function nowTime() {
 
 export function toDateString(time: Dayjs) {
   return time.format(timeFormat);
+}
+
+export function toSimpleDateString(time: string) {
+  return dayjs(time).format(timeFormatSimple);
 }
 
 export function addDurationToDate(date: string, duration: Duration): Dayjs {
@@ -43,6 +49,10 @@ export function secondsToReadable(durationSeconds: number) {
 
 export function dateToEpoch(date: string) {
   return dayjs(date).unix();
+}
+
+export function epochToDateStr(epoch: number) {
+  return toDateString(dayjs.unix(epoch));
 }
 
 export function dateToLocalDate(date: string) {

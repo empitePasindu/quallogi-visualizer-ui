@@ -22,6 +22,8 @@ export type Breached = {
   type: string;
   ruleset: string;
   activityTime: number;
+  startPoint: number;
+  endPoint: number;
   period: string;
 };
 
@@ -59,7 +61,7 @@ export type RestBreach = {
 };
 
 type Duration = {
-  minute: number;
+  minutes: number;
   humanized: string;
   iso: string;
   maximumWork: number;

@@ -12,6 +12,8 @@ import * as du from './dateUtils';
 import { DeleteActivityConfirmation, DeleteOption } from './Modals';
 import { ActivityTimeline } from './ActivityTimeline';
 import { BreachResult, getBFMBreaches } from './service/FatigueApi';
+import { RuleBreachCounter } from './RuleBreachCounter';
+import { BreachedCounterList } from './BreachedCounterList';
 
 type ActivityInputOptions = {
   /**append new activity to bottom*/
@@ -22,11 +24,17 @@ type ActivityInputOptions = {
 
 function App() {
   const [activities, setActivites] = useState<Activity[]>([]);
+  const [breachCounters, setBreachCounters] = useState<RuleBreachCounter[]>([]);
+
   const [breachResult, setBreachResult] = useState<BreachResult>();
   const [loading, setLoading] = useState(false);
 
   /**activity selected */
   const [selectedActivity, setSelectedActivity] = useState<Activity>();
+
+  /**counter selected */
+  const [selectedCounter, setSelectedCounter] = useState<RuleBreachCounter>();
+
   const [formInputActivity, setFormInputActivity] = useState<Activity>();
   const [inputOptions, setInputOptions] = useState<ActivityInputOptions>({ append: true, modify: false });
   const [resetForm, setResetForm] = useState(false);
@@ -102,14 +110,29 @@ function App() {
       minutes: activityInput.minutes,
     });
   };
-
-  const updateSelectedActivity = (selectedActivity: Activity) => {
+  /**sets or clears the activity selection*/
+  const updateSelectedActivity = (selectedActivity: Activity | null) => {
     activities.forEach((activity) => {
-      if (activity.id === selectedActivity.id) activity.setSelected(true);
+      if (activity.id === selectedActivity?.id) activity.setSelected(true);
       else activity.setSelected(false);
     });
     setActivites([...activities]);
-    setSelectedActivity(selectedActivity);
+    setSelectedActivity(selectedActivity ? selectedActivity : undefined);
+  };
+
+  /**sets or clears the counter selection*/
+  const updateSelectedCounter = (selectedCounter: RuleBreachCounter | null) => {
+    breachCounters.forEach((counter) => {
+      if (counter.id === selectedCounter?.id) counter.setSelected(true);
+      else counter.setSelected(false);
+    });
+    setBreachCounters([...breachCounters]);
+    setSelectedCounter(selectedCounter ? selectedCounter : undefined);
+  };
+
+  const resetSelections = () => {
+    updateSelectedActivity(null);
+    updateSelectedCounter(null);
   };
 
   //-----------API-----------------
@@ -119,6 +142,11 @@ function App() {
     console.log('got breaches', result);
     if (result) {
       setBreachResult(result);
+      setBreachCounters(
+        result.breached.map((breached, idx) => {
+          return RuleBreachCounter.fromBreached(idx, breached);
+        }),
+      );
     }
     setLoading(false);
   };
@@ -146,16 +174,15 @@ function App() {
               />
             </InputGroup>
           </div>
-          <div className="d-flex">
-            <Button variant="danger" onClick={() => setTriggerDeleteConfirmation((val) => !val)} disabled={selectedActivity == null}>
-              Delete
-            </Button>
-          </div>
-          <div className="d-flex">
-            <Button variant="success" onClick={() => getBreaches()} disabled={activities.length === 0}>
-              BFM
-            </Button>
-          </div>
+          <Button variant="danger" onClick={() => setTriggerDeleteConfirmation((val) => !val)} disabled={selectedActivity == null}>
+            Delete
+          </Button>
+          <Button variant="info" onClick={() => resetSelections()} disabled={!selectedActivity && !selectedCounter}>
+            Reset
+          </Button>
+          <Button variant="success" onClick={() => getBreaches()} disabled={activities.length === 0}>
+            BFM
+          </Button>
         </div>
         <div className="row">
           <ActivityForm activity={formInputActivity} onSubmit={onActivityAdd} disableDateEdit={activities.length !== 0} reset={resetForm} />
@@ -175,14 +202,14 @@ function App() {
               <h4 className="col">Breaches</h4>
               <div className="w-100"></div>
               <div className="col" style={{ maxHeight: '50vh', overflow: 'scroll' }}>
-                <ActivityList activities={activities} onActivityClick={updateSelectedActivity} />
+                <BreachedCounterList breachCounter={breachCounters} onCounterClick={updateSelectedCounter} />
               </div>
             </div>
           </div>
         </div>
         <div className="row">
           <div className="col bg-border">
-            <ActivityTimeline activities={activities} selectedActivity={selectedActivity} onActivitySelect={updateSelectedActivity} />
+            <ActivityTimeline activities={activities} selectedActivity={selectedActivity} breachResult={breachResult} onActivitySelect={updateSelectedActivity} />
           </div>
         </div>
       </div>

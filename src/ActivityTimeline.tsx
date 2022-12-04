@@ -5,6 +5,7 @@ import moment from 'moment';
 import { Activity, ActivityType } from './Activity';
 import { useEffect, useState } from 'react';
 import ReactCalendarTimeline from 'react-calendar-timeline';
+import { BreachResult } from './service/FatigueApi';
 
 const groups = [
   { id: 1, title: 'activities' },
@@ -44,7 +45,12 @@ interface TimeLineActivity {
   itemProps?: any;
 }
 
-export const ActivityTimeline = (props: { activities: Activity[]; selectedActivity: Activity | undefined; onActivitySelect: (activity: Activity) => void }) => {
+export const ActivityTimeline = (props: {
+  activities: Activity[];
+  breachResult: BreachResult | undefined;
+  selectedActivity: Activity | undefined;
+  onActivitySelect: (activity: Activity) => void;
+}) => {
   const [tLActivites, setTlActivities] = useState<TimeLineActivity[]>([]);
   const [startActivity, setStartActivity] = useState<TimeLineActivity>();
   const [endActivity, setEndActivity] = useState<TimeLineActivity>();
@@ -64,10 +70,19 @@ export const ActivityTimeline = (props: { activities: Activity[]; selectedActivi
         },
       };
     });
+
+    if (props.breachResult) newTlActivities.concat(mapBreachResults(props.breachResult));
+
     setTlActivities(newTlActivities);
     setStartActivity(newTlActivities[0]);
     setEndActivity(newTlActivities[newTlActivities.length - 1]);
-  }, [props.activities]);
+  }, [props.activities, props.breachResult]);
+
+  const mapBreachResults = (breachResult: BreachResult): TimeLineActivity[] => {
+    const tlActivities: TimeLineActivity[] = [];
+    breachResult.resultSet.forEach((rule) => {});
+    return tlActivities;
+  };
 
   const onActivitySelect = (id: number) => {
     console.log('selectedTimeplineActivityId', id);
