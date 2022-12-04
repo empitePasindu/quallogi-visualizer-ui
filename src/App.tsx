@@ -11,6 +11,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import * as du from './dateUtils';
 import { DeleteActivityConfirmation, DeleteOption } from './Modals';
 import { ActivityTimeline } from './ActivityTimeline';
+import { getBFMBreaches } from './service/FatigueApi';
 
 type ActivityInputOptions = {
   /**append new activity to bottom*/
@@ -21,6 +22,9 @@ type ActivityInputOptions = {
 
 function App() {
   const [activities, setActivites] = useState<Activity[]>([]);
+  const [breachResult, setBreachResult] = useState<any>();
+  const [loading, setLoading] = useState(false);
+
   /**activity selected */
   const [selectedActivity, setSelectedActivity] = useState<Activity>();
   const [formInputActivity, setFormInputActivity] = useState<Activity>();
@@ -108,6 +112,17 @@ function App() {
     setSelectedActivity(selectedActivity);
   };
 
+  //-----------API-----------------
+  const getBreaches = async () => {
+    setLoading(true);
+    const result = await getBFMBreaches(activities);
+    console.log('got breaches', result);
+    if (result) {
+      setBreachResult(result);
+    }
+    setLoading(false);
+  };
+
   return (
     <>
       <div className="container" style={{ width: '95vw' }}>
@@ -134,6 +149,11 @@ function App() {
           <div className="d-flex">
             <Button variant="danger" onClick={() => setTriggerDeleteConfirmation((val) => !val)} disabled={selectedActivity == null}>
               Delete
+            </Button>
+          </div>
+          <div className="d-flex">
+            <Button variant="success" onClick={() => getBreaches()} disabled={activities.length === 0}>
+              BFM
             </Button>
           </div>
         </div>
