@@ -11,7 +11,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import * as du from './dateUtils';
 import { DeleteActivityConfirmation, DeleteOption } from './Modals';
 import { ActivityTimeline } from './ActivityTimeline';
-import { getBFMBreaches } from './service/FatigueApi';
+import { BreachResult, getBFMBreaches } from './service/FatigueApi';
 
 type ActivityInputOptions = {
   /**append new activity to bottom*/
@@ -22,7 +22,7 @@ type ActivityInputOptions = {
 
 function App() {
   const [activities, setActivites] = useState<Activity[]>([]);
-  const [breachResult, setBreachResult] = useState<any>();
+  const [breachResult, setBreachResult] = useState<BreachResult>();
   const [loading, setLoading] = useState(false);
 
   /**activity selected */
