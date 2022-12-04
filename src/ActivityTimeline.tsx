@@ -2,35 +2,93 @@
 import 'react-calendar-timeline/lib/Timeline.css';
 import Timeline from 'react-calendar-timeline';
 import moment from 'moment';
+import { Activity, ActivityType } from './Activity';
+import { useEffect, useState } from 'react';
+import ReactCalendarTimeline from 'react-calendar-timeline';
 
 const groups = [
-  { id: 1, title: 'group 1' },
-  { id: 2, title: 'group 2' },
+  { id: 1, title: 'activities' },
+  { id: 2, title: 'breaches' },
 ];
 
-const items = [
-  {
-    id: 1,
-    group: 1,
-    title: 'item 1',
-    start_time: moment(),
-    end_time: moment().add(1, 'hour'),
+/** 
+const fullItemData = {
+  id: 1,
+  group: 1,
+  title: 'Random title',
+  start_time: 1457902922261,
+  end_time: 1457902922261 + 86400000,
+  canMove: true,
+  canResize: false,
+  canChangeGroup: false,
+  itemProps: {
+    // these optional attributes are passed to the root <div /> of each item as <div {...itemProps} />
+    'data-custom-attribute': 'Random content',
+    'aria-hidden': true,
+    onDoubleClick: () => {
+      console.log('You clicked double!');
+    },
+    className: 'weekend',
+    style: {
+      background: 'fuchsia',
+    },
   },
-  {
-    id: 2,
-    group: 2,
-    title: 'item 2',
-    start_time: moment().add(-0.5, 'hour'),
-    end_time: moment().add(0.5, 'hour'),
-  },
-  {
-    id: 3,
-    group: 1,
-    title: 'item 3',
-    start_time: moment().add(2, 'hour'),
-    end_time: moment().add(3, 'hour'),
-  },
-];
-export const ActivityTimeline = (props: {}) => {
-  return <Timeline groups={groups} items={items} defaultTimeStart={moment().add(-12, 'hour')} defaultTimeEnd={moment().add(12, 'hour')} />;
+};
+*/
+interface TimeLineActivity {
+  id: number;
+  group: number;
+  title: string;
+  start_time: moment.Moment;
+  end_time: moment.Moment;
+  itemProps?: {
+    style?: {
+      background: string;
+      color?: string;
+    };
+  };
+}
+
+export const ActivityTimeline = (props: { activities: Activity[]; selectedActivity: Activity | undefined; onActivitySelect: (activity: Activity) => void }) => {
+  const [tLActivites, setTlActivities] = useState<TimeLineActivity[]>([]);
+  const [startActivity, setStartActivity] = useState<TimeLineActivity>();
+  const [endActivity, setEndActivity] = useState<TimeLineActivity>();
+
+  useEffect(() => {
+    const newTlActivities = props.activities.map((act): TimeLineActivity => {
+      return {
+        id: act.id,
+        group: 1,
+        title: act.type.toUpperCase() + ' ' + act.id,
+        start_time: moment(act.startTime),
+        end_time: moment(act.endTime),
+        itemProps: {
+          style: {
+            background: act.type === ActivityType.rest ? 'green' : 'red',
+          },
+        },
+      };
+    });
+    setTlActivities(newTlActivities);
+    setStartActivity(newTlActivities[0]);
+    setEndActivity(newTlActivities[newTlActivities.length - 1]);
+  }, [props.activities]);
+
+  const onActivitySelect = (id: number) => {
+    const activity = props.activities.find((act) => act.id === id);
+    if (activity) props.onActivitySelect(activity);
+  };
+
+  return startActivity && endActivity ? (
+    <Timeline
+      groups={groups}
+      items={tLActivites}
+      defaultTimeStart={startActivity.start_time.subtract(2, 'day')}
+      defaultTimeEnd={endActivity.end_time.add(2, 'day')}
+      canMove={false}
+      onItemSelect={onActivitySelect}
+    />
+  ) : (
+    <></>
+  );
 };

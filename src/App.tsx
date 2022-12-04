@@ -162,7 +162,7 @@ function App() {
         </div>
         <div className="row">
           <div className="col bg-border">
-            <ActivityTimeline />
+            <ActivityTimeline activities={activities} selectedActivity={selectedActivity} onActivitySelect={updateSelectedActivity} />
           </div>
         </div>
       </div>
