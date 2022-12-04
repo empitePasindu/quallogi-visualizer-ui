@@ -24,7 +24,7 @@ export const DeleteActivityConfirmation = (props: { trigger: boolean; onConfirma
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Modal heading</Modal.Title>
+        <Modal.Title>Delete Activity</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="d-flex mt-2">
@@ -59,6 +59,60 @@ export const DeleteActivityConfirmation = (props: { trigger: boolean; onConfirma
           }}
         >
           Delete
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+};
+
+export const SaveActivityConfirmation = (props: { trigger: boolean; onConfirmation: (fileName: string) => void }) => {
+  const [show, setShow] = useState(false);
+  const [fileName, setFileName] = useState('');
+  const prevStateRef = useRef(false);
+  useEffect(() => {
+    if (prevStateRef.current !== props.trigger) {
+      handleShow();
+      prevStateRef.current = props.trigger;
+    }
+  }, [props.trigger]);
+
+  const handleClose = () => setShow(false);
+
+  const handleShow = () => setShow(true);
+
+  return (
+    <Modal show={show} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Save Activity</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <div className="container mt-2">
+          <Form.Label>Enter file name</Form.Label>
+          <Form.Control
+            name="days"
+            type="text"
+            className={fileName === '' ? 'error' : ''}
+            placeholder="file name"
+            onChange={(e) => {
+              setFileName(e.target.value);
+            }}
+            value={fileName}
+          />
+        </div>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>
+          Close
+        </Button>
+        <Button
+          variant="primary"
+          onClick={() => {
+            props.onConfirmation(fileName);
+            handleClose();
+          }}
+          disabled={fileName.length === 0}
+        >
+          Save
         </Button>
       </Modal.Footer>
     </Modal>

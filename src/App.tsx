@@ -14,6 +14,7 @@ import { ActivityTimeline } from './ActivityTimeline';
 import { BreachResult, getBFMBreaches } from './service/FatigueApi';
 import { RuleBreachCounter } from './RuleBreachCounter';
 import { BreachedCounterList } from './BreachedCounterList';
+import { SaveLoad } from './SaveLoad';
 
 type ActivityInputOptions = {
   /**append new activity to bottom*/
@@ -156,8 +157,8 @@ function App() {
   return (
     <>
       <div className="container" style={{ width: '95vw' }}>
-        <div className="d-flex justify-content-start mb-3">
-          <div className="d-flex mt-2">
+        <div className="row justify-content-start mb-3">
+          <div className="col mt-2">
             <InputGroup>
               <Form.Check
                 className="me-3"
@@ -176,15 +177,26 @@ function App() {
               />
             </InputGroup>
           </div>
-          <Button variant="danger" onClick={() => setTriggerDeleteConfirmation((val) => !val)} disabled={selectedActivity == null}>
-            Delete
-          </Button>
-          <Button variant="info" onClick={() => resetSelections()} disabled={!selectedActivity && !selectedCounter}>
-            Reset
-          </Button>
-          <Button variant="success" onClick={() => getBreaches()} disabled={activities.length === 0}>
-            BFM
-          </Button>
+          <div className="col">
+            <div className="row w-100 ml-2">
+              <div className="col">
+                <div className="d-flex">
+                  <Button variant="danger" onClick={() => setTriggerDeleteConfirmation((val) => !val)} disabled={selectedActivity == null}>
+                    Delete
+                  </Button>
+                  <Button variant="info" onClick={() => resetSelections()} disabled={!selectedActivity && !selectedCounter}>
+                    Reset
+                  </Button>
+                  <Button variant="success" onClick={() => getBreaches()} disabled={activities.length === 0}>
+                    BFM
+                  </Button>
+                </div>
+              </div>
+              <div className="col">
+                <SaveLoad />
+              </div>
+            </div>
+          </div>
         </div>
         <div className="row">
           <ActivityForm activity={formInputActivity} onSubmit={onActivityAdd} disableDateEdit={activities.length !== 0} reset={resetForm} />
@@ -209,7 +221,7 @@ function App() {
             </div>
           </div>
         </div>
-        <div className="row">
+        <div className="row mt-3">
           <div className="col bg-border">
             <ActivityTimeline
               activities={activities}
