@@ -1,14 +1,16 @@
 import dayjs, { Dayjs } from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import timezone from 'dayjs/plugin/timezone';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
 import { Duration } from './Activity';
 const timeZone = 'Australia/Melbourne'; //GMT+11
 const timeFormat = 'YYYY-MM-DDTHH:mm:ssZ';
 //const timeZone = 'Asia/Colombo'
-
-dayjs.extend(duration);
 dayjs.extend(timezone);
 dayjs.tz.setDefault(timeZone);
+dayjs.extend(duration);
+dayjs.extend(relativeTime);
 
 export function nowTime() {
   return dayjs();
@@ -21,22 +23,25 @@ export function toDateString(time: Dayjs) {
 export function addDurationToDate(date: string, duration: Duration): Dayjs {
   return dayjs(date).add(duration.days, 'day').add(duration.hours, 'hour').add(duration.minutes, 'minute');
 }
+/**add if seconds >  0 ,subtract if seconds < 0 */
+export function addSecondsToDate(date: string, seconds: number): Dayjs {
+  return seconds > 0 ? dayjs(date).add(seconds, 'second') : dayjs(date).subtract(Math.abs(seconds), 'second');
+}
 
-export function addMilliSecondsToDate(date: string, milliSeconds: number): Dayjs {
-  return dayjs(date).add(milliSeconds, 'millisecond');
+export function subtractSecondsFromDate(date: string, seconds: number): Dayjs {
+  return dayjs(date).subtract(seconds, 'second');
 }
 
 /**@returns time difference in milliseconds */
 export function timeDiff(startTime: string, endTime: string): number {
-  return dayjs(startTime).diff(endTime);
+  return dayjs(endTime).diff(startTime, 'second');
 }
 
-export function msToReadable(durationMs: number) {
-  //   return dayjs.duration(durationMs, 'millisecond').humanize();
-  return '0';
+export function secondsToReadable(durationSeconds: number) {
+  return dayjs.duration(durationSeconds, 'second').humanize();
 }
 
-export function dateToMs(date: string) {
+export function dateToEpoch(date: string) {
   return dayjs(date).unix();
 }
 
@@ -44,8 +49,12 @@ export function dateToLocalDate(date: string) {
   return dayjs(date).toDate();
 }
 
-export function getDurationFromMs(durationMs: number): Duration {
-  const durationObj = dayjs.duration(durationMs, 'millisecond');
+export function localDateToString(date: Date) {
+  return dayjs(date).format(timeFormat);
+}
+
+export function getDurationFromSeconds(durationSec: number): Duration {
+  const durationObj = dayjs.duration(durationSec, 'second');
   const days = durationObj.asDays();
   const hours = durationObj.subtract(days, 'day').asHours();
   const minutes = durationObj.subtract(days, 'day').subtract(hours, 'hour').asMinutes();

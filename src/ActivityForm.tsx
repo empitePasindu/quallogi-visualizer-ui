@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import 'react-datepicker/dist/react-datepicker.css';
 import { Activity, ActivityType } from './Activity';
 import { useEffect, useState } from 'react';
-import { dateToLocalDate, getDurationFromMs, nowTime } from './dateUtils';
+import { dateToLocalDate, getDurationFromSeconds, nowTime } from './dateUtils';
 
 type DatePickerProps = {
   name: any;
@@ -56,7 +56,7 @@ export const ActivityForm = (props: { disableDateEdit: boolean; activity?: Activ
 
   useEffect(() => {
     if (props.activity) {
-      setFormData({ ...getDurationFromMs(props.activity.duration), startDate: dateToLocalDate(props.activity.startTime), type: props.activity.type });
+      setFormData({ ...getDurationFromSeconds(props.activity.duration), startDate: dateToLocalDate(props.activity.startTime), type: props.activity.type });
     } else {
       setFormData({ ...defaultFormData });
     }

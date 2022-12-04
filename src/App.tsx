@@ -8,10 +8,12 @@ import { ActivityList } from './ActivityList';
 import { Activity, ActivityType, Duration, IActivity } from './Activity';
 import { InputGroup, Form, Button } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
+import * as du from './dateUtils';
+import { DeleteActivityConfirmation, DeleteOption } from './Modals';
 
 type ActivityInputOptions = {
-  /**add new activity*/
-  addNew: boolean;
+  /**append new activity to bottom*/
+  append: boolean;
   /**modify a selected activity */
   modify: boolean;
 };
@@ -20,64 +22,103 @@ function App() {
   const [activities, setActivites] = useState<Activity[]>([]);
   /**activity selected */
   const [selectedActivity, setSelectedActivity] = useState<Activity>();
-  const [inputOptions, setInputOptions] = useState<ActivityInputOptions>({ addNew: true, modify: false });
+  const [formInputActivity, setFormInputActivity] = useState<Activity>();
+  const [inputOptions, setInputOptions] = useState<ActivityInputOptions>({ append: true, modify: false });
   const [resetForm, setResetForm] = useState(false);
-  const addActivity = (startDate: string, type: ActivityType, duration: Duration) => {
-    const newActivity = Activity.fromOffestDuration(activities.length, startDate, type, duration);
+  const [triggerDeleteConfirmation, setTriggerDeleteConfirmation] = useState(false);
 
-    if (newActivity.duration == 0) {
-      toast.error('duration cannot be Zero');
+  const addActivity = (startDate: string, type: ActivityType, duration: Duration) => {
+    if (duration.days === 0 && duration.hours === 0 && duration.minutes === 0) {
+      toast.error('duration cannot be Zero ');
       return;
     }
 
     if (activities.length === 0) {
-      setActivites([...activities, Activity.fromOffestDuration(0, startDate, type, duration)]);
-      console.log('setting activities');
+      const firstActivity = Activity.withDuration(0, startDate, type, duration);
+      setActivites([firstActivity]);
       return;
     }
 
+    const newActivity = Activity.withDuration(activities.length, activities[activities.length - 1].endTime, type, duration);
+
     if (!selectedActivity) {
-      const existingActivity = activities.find((act) => act.startTimeMs === newActivity.startTimeMs);
+      const existingActivity = activities.find((act) => act.startTimeS === newActivity.startTimeS);
       if (existingActivity) {
         toast.error('Activity already exists at id:' + existingActivity.id);
         return;
       }
 
       setActivites([...activities, newActivity]);
+      return;
     }
+    console.log('has selectedActivity');
 
     //if activity is selected for modification adjust all the durations of that activity and in the activities after that
   };
 
   useEffect(() => {
-    console.log('activities updated', activities);
-  }, [activities]);
-  const removeActivity = (activityId: number) => {
-    setActivites(activities.filter((activity) => activity.id !== activityId));
+    console.log('updates', selectedActivity, activities);
+
+    if (selectedActivity) setFormInputActivity(selectedActivity);
+    else if (activities.length > 0) setFormInputActivity(activities[activities.length - 1]);
+    else setFormInputActivity(undefined);
+  }, [activities, selectedActivity]);
+
+  /**Removes a given activity and
+   *
+   * - option===moveAfterActivites >>  moves the after activities backward by the removed activity's duration
+   * - option===moveBeforeActivities >>  moves the before activities forward by the removed activity's duration */
+  const removeActivity = (activityId: number, option: DeleteOption) => {
+    const targetActivityIndex = activityId;
+    if (targetActivityIndex == -1) throw Error('no activity found to delete');
+    const targetActivity = activities[targetActivityIndex];
+
+    activities.forEach((activity, index) => {
+      if (option === DeleteOption.moveBeforeActivities && index <= targetActivityIndex) activity.moveActivityTimeBy(targetActivity.duration);
+      else if (option === DeleteOption.moveAfterActivites && index >= targetActivityIndex) activity.moveActivityTimeBy(targetActivity.duration * -1);
+
+      if (index >= targetActivityIndex) activity.id -= 1;
+    });
+    activities.splice(targetActivityIndex, 1);
+    setActivites([...activities]);
+    setSelectedActivity(undefined);
   };
 
-  const removeSelectedActivity = () => {
+  const removeSelectedActivity = (option: DeleteOption) => {
     if (selectedActivity) {
-      removeActivity(selectedActivity.id);
+      removeActivity(selectedActivity.id, option);
     }
   };
 
   const onActivityAdd = (activityInput: ActivityFormData) => {
-    addActivity(activityInput.startDate.toString(), activityInput.type as ActivityType, { days: activityInput.days, hours: activityInput.hours, minutes: activityInput.minutes });
+    addActivity(du.localDateToString(activityInput.startDate), activityInput.type as ActivityType, {
+      days: activityInput.days,
+      hours: activityInput.hours,
+      minutes: activityInput.minutes,
+    });
+  };
+
+  const updateSelectedActivity = (selectedActivity: Activity) => {
+    activities.forEach((activity) => {
+      if (activity.id === selectedActivity.id) activity.setSelected(true);
+      else activity.setSelected(false);
+    });
+    setActivites([...activities]);
+    setSelectedActivity(selectedActivity);
   };
 
   return (
     <>
-      <div className="container">
+      <div className="container" style={{ width: '95vw' }}>
         <div className="d-flex justify-content-start mb-3">
           <div className="d-flex mt-2">
             <InputGroup>
               <Form.Check
                 className="me-3"
                 type="radio"
-                label={'Add'}
-                checked={inputOptions.addNew}
-                onClick={() => setInputOptions({ addNew: !inputOptions.addNew, modify: !inputOptions.modify })}
+                label={'Append'}
+                checked={inputOptions.append}
+                onChange={() => setInputOptions({ append: !inputOptions.append, modify: !inputOptions.modify })}
               />
 
               <Form.Check
@@ -85,27 +126,28 @@ function App() {
                 type="radio"
                 label={'Modify'}
                 checked={inputOptions.modify}
-                onClick={() => setInputOptions({ addNew: !inputOptions.addNew, modify: !inputOptions.modify })}
+                onChange={() => setInputOptions({ append: !inputOptions.append, modify: !inputOptions.modify })}
               />
             </InputGroup>
           </div>
           <div className="d-flex">
-            <Button variant="danger" onClick={removeSelectedActivity}>
+            <Button variant="danger" onClick={() => setTriggerDeleteConfirmation((val) => !val)} disabled={selectedActivity == null}>
               Delete
             </Button>
           </div>
         </div>
         <div className="row">
-          <ActivityForm activity={selectedActivity} onSubmit={onActivityAdd} disableDateEdit={selectedActivity != null} reset={resetForm} />
+          <ActivityForm activity={formInputActivity} onSubmit={onActivityAdd} disableDateEdit={activities.length !== 0} reset={resetForm} />
         </div>
         <div className="row bg-border">
-          <div className="col-4 bg-border">
-            <ActivityList activities={activities} />
+          <div className="col-4 bg-border" style={{ maxHeight: '50vh', overflow: 'scroll' }}>
+            <ActivityList activities={activities} onActivityClick={updateSelectedActivity} />
           </div>
           <div className="col-8 bg-border">asas</div>
         </div>
       </div>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss pauseOnHover theme="colored" />
+      <DeleteActivityConfirmation trigger={triggerDeleteConfirmation} onConfirmation={removeSelectedActivity} />
     </>
   );
 }
