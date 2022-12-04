@@ -41,12 +41,7 @@ interface TimeLineActivity {
   title: string;
   start_time: moment.Moment;
   end_time: moment.Moment;
-  itemProps?: {
-    style?: {
-      background: string;
-      color?: string;
-    };
-  };
+  itemProps?: any;
 }
 
 export const ActivityTimeline = (props: { activities: Activity[]; selectedActivity: Activity | undefined; onActivitySelect: (activity: Activity) => void }) => {
@@ -57,14 +52,14 @@ export const ActivityTimeline = (props: { activities: Activity[]; selectedActivi
   useEffect(() => {
     const newTlActivities = props.activities.map((act): TimeLineActivity => {
       return {
-        id: act.id,
+        id: act.id + 1,
         group: 1,
         title: act.type.toUpperCase() + ' ' + act.id,
         start_time: moment(act.startTime),
         end_time: moment(act.endTime),
         itemProps: {
           style: {
-            background: act.type === ActivityType.rest ? 'green' : 'red',
+            'background-color': act.type === ActivityType.rest ? 'green' : 'red',
           },
         },
       };
@@ -75,7 +70,8 @@ export const ActivityTimeline = (props: { activities: Activity[]; selectedActivi
   }, [props.activities]);
 
   const onActivitySelect = (id: number) => {
-    const activity = props.activities.find((act) => act.id === id);
+    console.log('selectedTimeplineActivityId', id);
+    const activity = props.activities.find((act) => act.id === id - 1);
     if (activity) props.onActivitySelect(activity);
   };
 
@@ -86,6 +82,7 @@ export const ActivityTimeline = (props: { activities: Activity[]; selectedActivi
       defaultTimeStart={startActivity.start_time.subtract(2, 'day')}
       defaultTimeEnd={endActivity.end_time.add(2, 'day')}
       canMove={false}
+      itemHeightRatio={0.75}
       onItemSelect={onActivitySelect}
     />
   ) : (
