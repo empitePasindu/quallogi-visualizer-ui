@@ -10,6 +10,7 @@ import { InputGroup, Form, Button } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import * as du from './dateUtils';
 import { DeleteActivityConfirmation, DeleteOption } from './Modals';
+import { ActivityTimeline } from './ActivityTimeline';
 
 type ActivityInputOptions = {
   /**append new activity to bottom*/
@@ -140,10 +141,29 @@ function App() {
           <ActivityForm activity={formInputActivity} onSubmit={onActivityAdd} disableDateEdit={activities.length !== 0} reset={resetForm} />
         </div>
         <div className="row bg-border">
-          <div className="col-4 bg-border" style={{ maxHeight: '50vh', overflow: 'scroll' }}>
-            <ActivityList activities={activities} onActivityClick={updateSelectedActivity} />
+          <div className="col bg-border">
+            <div className="row bg-border">
+              <h4 className="col">Activities</h4>
+              <div className="w-100"></div>
+              <div className="col" style={{ maxHeight: '50vh', overflow: 'scroll' }}>
+                <ActivityList activities={activities} onActivityClick={updateSelectedActivity} />
+              </div>
+            </div>
           </div>
-          <div className="col-8 bg-border">asas</div>
+          <div className="col bg-border">
+            <div className="row bg-border">
+              <h4 className="col">Breaches</h4>
+              <div className="w-100"></div>
+              <div className="col" style={{ maxHeight: '50vh', overflow: 'scroll' }}>
+                <ActivityList activities={activities} onActivityClick={updateSelectedActivity} />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col bg-border">
+            <ActivityTimeline />
+          </div>
         </div>
       </div>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss pauseOnHover theme="colored" />
