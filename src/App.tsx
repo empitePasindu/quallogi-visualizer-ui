@@ -136,6 +136,13 @@ function App() {
     updateSelectedCounter(null);
   };
 
+  const resetAll = () => {
+    updateSelectedActivity(null);
+    updateSelectedCounter(null);
+    setActivites([]);
+    setBreachCounters([]);
+  };
+
   //-----------API-----------------
   const getBreaches = async () => {
     setLoading(true);
@@ -184,7 +191,10 @@ function App() {
                   <Button variant="danger" onClick={() => setTriggerDeleteConfirmation((val) => !val)} disabled={selectedActivity == null}>
                     Delete
                   </Button>
-                  <Button variant="info" onClick={() => resetSelections()} disabled={!selectedActivity && !selectedCounter}>
+                  <Button variant="info" onClick={resetSelections} disabled={!selectedActivity && !selectedCounter}>
+                    Deselect
+                  </Button>
+                  <Button variant="warning" onClick={resetAll} disabled={activities.length === 0 && breachCounters.length === 0}>
                     Reset
                   </Button>
                   <Button variant="success" onClick={() => getBreaches()} disabled={activities.length === 0}>
@@ -193,7 +203,7 @@ function App() {
                 </div>
               </div>
               <div className="col">
-                <SaveLoad />
+                <SaveLoad activities={activities} onActivitesLoaded={setActivites} />
               </div>
             </div>
           </div>

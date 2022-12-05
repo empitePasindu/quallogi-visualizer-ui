@@ -10,10 +10,14 @@ export interface Duration {
   hours: number;
   minutes: number;
 }
-export interface IActivity {
-  id: number;
+
+export interface IBaseActivity {
   startTime: string;
   type: ActivityType;
+}
+
+export interface IActivity extends IBaseActivity {
+  id: number;
   duration?: number;
   endTime?: string;
 }
@@ -34,26 +38,34 @@ export class Activity implements IActivity {
   /**end time in unix epoch (seconds) */
   endTimeS: number = 0;
 
-  /**duration=0 and endTime='' for lastActivity */
+  /**endTime= currentTime for lastActivity
+   *
+   * This is the way js logic works
+   */
   isLastActivity = false;
 
   //-----UI-----
   /**used to set as selected element */
   selected = false;
 
-  constructor(activity: IActivity) {
+  /**for isLastActivity === true duration and endTime input is not considered */
+  constructor(activity: IActivity, isLastActivity = false) {
     this.id = activity.id;
     this.startTime = activity.startTime;
     this.type = activity.type;
     this.duration = activity.duration ? activity.duration : 0;
 
-    this.isLastActivity = this.duration === 0;
-
-    if (!this.isLastActivity && activity.endTime) this.endTime = activity.endTime;
-    else this.endTime = activity.duration ? du.toDateString(du.addSecondsToDate(activity.startTime, activity.duration)) : '';
+    if (isLastActivity) {
+      this.isLastActivity = true;
+      this.endTime = du.toDateString(du.nowTime());
+      this.duration = du.timeDiff(this.startTime, this.endTime);
+    } else {
+      if (activity.endTime) this.endTime = activity.endTime;
+      else this.endTime = activity.duration ? du.toDateString(du.addSecondsToDate(activity.startTime, activity.duration)) : '';
+    }
 
     this.startTimeS = du.dateToEpoch(this.startTime);
-    this.endTimeS = this.isLastActivity ? du.dateToEpoch(this.endTime) : 0;
+    this.endTimeS = du.dateToEpoch(this.endTime);
     this.durationStr = this.duration > 0 ? du.secondsToReadable(this.duration) : '0';
   }
 
@@ -79,8 +91,12 @@ export class Activity implements IActivity {
     const durationMs = du.timeDiff(startTime, endTime);
     return new Activity({ id: id, startTime: startTime, type: type, duration: durationMs, endTime: endTime });
   }
-  /**ad */
+  public static withEndTime(id: number, startTime: string, type: ActivityType, endTime: string): Activity {
+    const durationMs = du.timeDiff(startTime, endTime);
+    return new Activity({ id: id, startTime: startTime, type: type, duration: durationMs, endTime: endTime });
+  }
+  /**last activity will have current time as end time */
   public static asLastActivity(id: number, startTime: string, type: ActivityType): Activity {
-    return new Activity({ id: id, startTime: startTime, type: type });
+    return new Activity({ id: id, startTime: startTime, type: type }, true);
   }
 }

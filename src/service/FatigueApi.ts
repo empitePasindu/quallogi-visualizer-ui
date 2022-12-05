@@ -1,7 +1,11 @@
-import { Activity } from '../Activity';
+import { IActivity, IBaseActivity } from '../Activity';
 
 const BASE_URL = 'http://localhost:3300/';
-const get_breaches = BASE_URL + 'get-breaches';
+const GET_BREACHES_API = BASE_URL + 'get-breaches';
+const ACTIVITY_FILE_NAMES_API = BASE_URL + 'get-activity-file-names';
+const SAVE_ACTIVITY_API = BASE_URL + 'save-activity';
+const GET_ACTIVITY_LIST_API = BASE_URL + 'get-activity-list';
+
 /**extrac work causes breaches */
 export type Breach = {
   name: string;
@@ -96,13 +100,56 @@ export type BreachResult = {
   breached: Breached[];
 };
 
-/**return input samples from backend */
-export function getInputs() {}
+/**Load all filenames of the saved activityLists */
+export async function getActivityFileNames(): Promise<string[]> {
+  const response = await fetch(ACTIVITY_FILE_NAMES_API, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  const data = await response.json();
+  if (response.ok) {
+    return Promise.resolve(data.fileNames);
+  } else {
+    throw Error('Fatigue API getActivityFileNames Request failed');
+  }
+}
+/**saves activities as json file with the given fileName */
+export async function saveActivitiesList(activities: IBaseActivity[], fileName: string) {
+  const response = await fetch(SAVE_ACTIVITY_API, {
+    method: 'POST',
+    body: JSON.stringify({ activities: activities, fileName: fileName }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  const data = await response.json();
+  if (response.ok) {
+    return Promise.resolve(true);
+  } else {
+    throw Error('Fatigue API saveActivitiesList Request failed');
+  }
+}
 
-export function getRuleSet() {}
+/**Load activity list with the given fileName */
+export async function getActivityList(fileName: string): Promise<IBaseActivity[]> {
+  const response = await fetch(GET_ACTIVITY_LIST_API + '?fileName=' + fileName, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  const data = await response.json();
+  if (response.ok) {
+    return Promise.resolve(data.activities);
+  } else {
+    throw Error('Fatigue API getActivityList Request failed');
+  }
+}
 
-export async function getBFMBreaches(activities: Activity[]): Promise<BreachResult> {
-  const response = await fetch(get_breaches, {
+export async function getBFMBreaches(activities: IActivity[]): Promise<BreachResult> {
+  const response = await fetch(GET_BREACHES_API, {
     method: 'POST',
     body: JSON.stringify({ tada: 'tada' }),
     headers: {
