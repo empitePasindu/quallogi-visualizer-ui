@@ -44,10 +44,13 @@ export class Activity implements IActivity {
    */
   isLastActivity = false;
 
-  //-----UI-----
+  //-------UI--------
   /**used to set as selected element */
   selected = false;
-
+  /**holds sum of workDurations from prev startActivity in seconds */
+  totalWork = 0;
+  /**holds sum of restDurations from prev startActivity in seconds*/
+  totalRest = 0;
   /**for isLastActivity === true duration and endTime input is not considered */
   constructor(activity: IActivity, isLastActivity = false) {
     this.id = activity.id;
@@ -73,6 +76,16 @@ export class Activity implements IActivity {
     this.selected = selected;
   }
 
+  public getTotalWorkHumanized() {
+    return du.secondsToISO(this.totalWork).replace('P', '').replace('T', '');
+  }
+  public getTotalRestHumanized() {
+    return du.secondsToISO(this.totalRest).replace('P', '').replace('T', '');
+  }
+  public resetTotalDurations() {
+    this.totalRest = 0;
+    this.totalWork = 0;
+  }
   /**moves the activity(startTime and endTime) forward (duration>0) or backward(duration<0) by the given duration
    *
    * keeping its original duration the same.

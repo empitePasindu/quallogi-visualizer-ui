@@ -46,6 +46,10 @@ export function timeDiff(startTime: string, endTime: string): number {
 export function secondsToReadable(durationSeconds: number) {
   return dayjs.duration(durationSeconds, 'second').humanize();
 }
+/** @returns 1D2H3M,2D3H,.. with up to a minute resolution */
+export function secondsToISO(durationSeconds: number) {
+  return dayjs.duration(Math.ceil(durationSeconds / 60), 'minute').toISOString();
+}
 
 export function dateToEpoch(date: string) {
   return dayjs(date).unix();

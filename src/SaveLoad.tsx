@@ -8,7 +8,7 @@ import { getActivityFileNames, getActivityList, saveActivitiesList } from './ser
 
 export const SaveLoad = (props: { triggerReset: boolean; activities: IBaseActivity[]; onActivitesLoaded: (activities: Activity[]) => void }) => {
   const [triggerSave, setTriggerSave] = useState(false);
-  const [triggerLoad, setTriggerLoad] = useState(true);
+  const [triggerLoad, setTriggerLoad] = useState(false);
   /**activity list file names */
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [selectedFileName, setSelectedFileName] = useState('');
