@@ -15,6 +15,7 @@ import { BreachResult, getBFMBreaches } from './service/FatigueApi';
 import { RuleBreachCounter } from './RuleBreachCounter';
 import { BreachedCounterList } from './BreachedCounterList';
 import { SaveLoad } from './SaveLoad';
+import { scrollToElement } from './utils';
 
 type ActivityInputOptions = {
   /**append new activity to bottom*/
@@ -32,6 +33,9 @@ function App() {
 
   /**activity selected */
   const [selectedActivity, setSelectedActivity] = useState<Activity>();
+
+  /**duration add start point */
+  const [durationAddStartActivity, setDurationAddStartActivity] = useState<Activity>();
 
   /**counter selected */
   const [selectedCounter, setSelectedCounter] = useState<RuleBreachCounter>();
@@ -79,6 +83,8 @@ function App() {
     else setFormInputActivity(undefined);
   }, [activities, selectedActivity]);
 
+  useEffect(() => {}, [durationAddStartActivity]);
+
   /**Removes a given activity and
    *
    * - option===moveAfterActivites >>  moves the after activities backward by the removed activity's duration
@@ -115,8 +121,9 @@ function App() {
   /**sets or clears the activity selection*/
   const updateSelectedActivity = (selectedActivity: Activity | null) => {
     activities.forEach((activity) => {
-      if (activity.id === selectedActivity?.id) activity.setSelected(true);
-      else activity.setSelected(false);
+      if (activity.id === selectedActivity?.id) {
+        activity.setSelected(true);
+      } else activity.setSelected(false);
     });
     setActivites([...activities]);
     setSelectedActivity(selectedActivity ? selectedActivity : undefined);
@@ -130,6 +137,39 @@ function App() {
     });
     setBreachCounters([...breachCounters]);
     setSelectedCounter(selectedCounter ? selectedCounter : undefined);
+  };
+
+  /**sets the selected activity as duration add start and does the other related calcualations*/
+  const setDurationAddStart = (set: boolean) => {
+    if (selectedActivity && set) {
+      setActivites([...addUpDurations(selectedActivity.id, activities)]);
+      setDurationAddStartActivity(selectedActivity);
+    } else {
+      setActivites(
+        activities.map((act) => {
+          act.resetTotalDurations();
+          return act;
+        }),
+      );
+      setDurationAddStartActivity(undefined);
+    }
+  };
+
+  const addUpDurations = (startActivityId: number, activities: Activity[]) => {
+    let workSum = 0;
+    let restSum = 0;
+    activities.forEach((act) => {
+      if (act.id >= startActivityId) {
+        if (act.type === ActivityType.work) {
+          workSum += act.duration;
+        } else {
+          restSum += act.duration;
+        }
+      }
+      act.totalRest = restSum;
+      act.totalWork = workSum;
+    });
+    return activities;
   };
 
   const resetSelections = () => {
@@ -148,6 +188,7 @@ function App() {
   //-----------API-----------------
   const getBreaches = async () => {
     setLoading(true);
+    const startTime = Date.now();
     const result = await getBFMBreaches(activities);
     console.log('got breaches', result);
     if (result) {
@@ -159,6 +200,9 @@ function App() {
             return RuleBreachCounter.fromBreached(idx, breached);
           }),
       );
+      const endTime = Date.now() - startTime;
+      toast.success('Calcuation Done in ' + endTime / 1000 + 's');
+      console.log('time taken', endTime);
     }
     setLoading(false);
   };
@@ -213,13 +257,29 @@ function App() {
         <div className="row">
           <ActivityForm activity={formInputActivity} onSubmit={onActivityAdd} disableDateEdit={activities.length !== 0} reset={resetForm} />
         </div>
+        <div className="row">
+          <div className="col-3 d-flex">
+            <Button
+              variant="info"
+              onClick={() => {
+                setDurationAddStart(durationAddStartActivity ? false : true);
+              }}
+              disabled={!selectedActivity && !durationAddStartActivity}
+            >
+              {durationAddStartActivity ? 'Reset Add' : 'Set Add'}
+            </Button>
+            <div className="mx-3 d-flex">
+              <h4 className="align-self-center">{durationAddStartActivity?.id}</h4>
+            </div>
+          </div>
+        </div>
         <div className="row bg-border">
           <div className="col bg-border">
             <div className="row bg-border">
               <h4 className="col">Activities</h4>
               <div className="w-100"></div>
               <div className="col" style={{ maxHeight: '50vh', overflow: 'scroll' }}>
-                <ActivityList activities={activities} onActivityClick={updateSelectedActivity} />
+                <ActivityList activities={activities} selectedActivity={selectedActivity} onActivityClick={updateSelectedActivity} />
               </div>
             </div>
           </div>
