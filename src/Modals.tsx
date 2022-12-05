@@ -133,6 +133,7 @@ export const LoadActivityFileConfirmation = (props: { fileNames: string[]; trigg
 
   useEffect(() => {
     setFileNames(props.fileNames);
+    if (props.fileNames.length > 0) setSelectedFileName(props.fileNames[0]);
   }, [props.fileNames]);
 
   const handleClose = () => setShow(false);
@@ -168,7 +169,7 @@ export const LoadActivityFileConfirmation = (props: { fileNames: string[]; trigg
           }}
           disabled={selectedFileName.length === 0}
         >
-          Save
+          Load
         </Button>
       </Modal.Footer>
     </Modal>

@@ -85,7 +85,6 @@ export class Activity implements IActivity {
     this.endTime = du.toDateString(du.addSecondsToDate(this.endTime, duration));
     this.endTimeS = du.dateToEpoch(this.endTime);
   }
-
   public static withDuration(id: number, startTime: string, type: ActivityType, duration: Duration = { days: 0, hours: 0, minutes: 0 }): Activity {
     const endTime = du.toDateString(du.addDurationToDate(startTime, duration));
     const durationMs = du.timeDiff(startTime, endTime);

@@ -39,6 +39,7 @@ function App() {
   const [formInputActivity, setFormInputActivity] = useState<Activity>();
   const [inputOptions, setInputOptions] = useState<ActivityInputOptions>({ append: true, modify: false });
   const [resetForm, setResetForm] = useState(false);
+  const [fullResetTrigger, setFullResetTrigger] = useState(false);
   const [triggerDeleteConfirmation, setTriggerDeleteConfirmation] = useState(false);
 
   const addActivity = (startDate: string, type: ActivityType, duration: Duration) => {
@@ -141,6 +142,7 @@ function App() {
     updateSelectedCounter(null);
     setActivites([]);
     setBreachCounters([]);
+    setFullResetTrigger((trig) => !trig);
   };
 
   //-----------API-----------------
@@ -203,7 +205,7 @@ function App() {
                 </div>
               </div>
               <div className="col">
-                <SaveLoad activities={activities} onActivitesLoaded={setActivites} />
+                <SaveLoad activities={activities} onActivitesLoaded={setActivites} triggerReset={fullResetTrigger} />
               </div>
             </div>
           </div>
@@ -231,7 +233,7 @@ function App() {
             </div>
           </div>
         </div>
-        <div className="row mt-3">
+        <div className="row mb-5">
           <div className="col bg-border">
             <ActivityTimeline
               activities={activities}

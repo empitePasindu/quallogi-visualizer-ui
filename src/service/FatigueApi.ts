@@ -119,7 +119,7 @@ export async function getActivityFileNames(): Promise<string[]> {
 export async function saveActivitiesList(activities: IBaseActivity[], fileName: string) {
   const response = await fetch(SAVE_ACTIVITY_API, {
     method: 'POST',
-    body: JSON.stringify({ activities: activities, fileName: fileName }),
+    body: JSON.stringify({ activities: activities.map((act): IBaseActivity => ({ startTime: act.startTime, type: act.type })), fileName: fileName }),
     headers: {
       'Content-Type': 'application/json',
     },
@@ -151,7 +151,7 @@ export async function getActivityList(fileName: string): Promise<IBaseActivity[]
 export async function getBFMBreaches(activities: IActivity[]): Promise<BreachResult> {
   const response = await fetch(GET_BREACHES_API, {
     method: 'POST',
-    body: JSON.stringify({ tada: 'tada' }),
+    body: JSON.stringify({ activities: activities.map((act): IBaseActivity => ({ startTime: act.startTime, type: act.type })) }),
     headers: {
       'Content-Type': 'application/json',
     },
