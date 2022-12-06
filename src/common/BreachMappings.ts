@@ -1,4 +1,5 @@
 import { IMainBreach } from '../models/BreachMapper';
+import { RuleType } from '../models/RuleBreachCounter';
 
 type TBreachMappings = {
   mainBreaches: IMainBreach[];
@@ -10,6 +11,7 @@ export const breachMappings: TBreachMappings = {
     {
       name: '14 Day',
       description: '14 day rule',
+      type: RuleType.Day14,
       subBreaches: [
         {
           name: '84 Hour',

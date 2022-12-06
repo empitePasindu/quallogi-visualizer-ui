@@ -5,7 +5,7 @@
 
 import { breachMappings } from '../common/BreachMappings';
 import { Activity } from './Activity';
-import { IBreach } from './Breach';
+import { RuleType } from './RuleBreachCounter';
 
 export interface IDocumentReference {
   /**common name used for the breach */
@@ -25,6 +25,7 @@ export interface IMainBreach {
   /**unique name for the main rule */
   name: string;
   description: string;
+  type: RuleType;
   subBreaches: ISubBreach[];
 }
 
@@ -53,6 +54,7 @@ const getMainBreachBySubBreachName = (subBreachName: string) => {
   return mainBreach;
 };
 
+/**representa an expected (manually created) sub breach object  */
 export class SubBreach implements ISubBreach {
   description: string;
   documentReference: IDocumentReference;

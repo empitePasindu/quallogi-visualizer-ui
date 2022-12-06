@@ -28,6 +28,7 @@ type ActivityInputOptions = {
 
 function App() {
   const [activities, setActivites] = useState<Activity[]>([]);
+  /**represents exptected breaches that were added manually */
   const [breaches, setBreaches] = useState<SubBreach[]>([]);
   const [breachCounters, setBreachCounters] = useState<RuleBreachCounter[]>([]);
 
@@ -166,10 +167,11 @@ function App() {
     setSelectedBreach(selectedBreach ? selectedBreach : undefined);
   };
 
-  const onBreachSelectUpdate = (breach: SubBreach | null) => {
+  /**@param selectSameActivityBreaches selects the other breaches belonging to the activity of the breach */
+  const onBreachSelectUpdate = (breach: SubBreach | null, selectSameActivityBreaches = false) => {
     updateSelectedBreach(breach);
     if (breach) {
-      updateSelectedActivity(breach.activity, false);
+      updateSelectedActivity(breach.activity, selectSameActivityBreaches);
     }
   };
 
@@ -296,7 +298,14 @@ function App() {
                 </div>
               </div>
               <div className="col">
-                <SaveLoad activities={activities} onActivitesLoaded={setActivites} triggerReset={fullResetTrigger} />
+                <SaveLoad
+                  activities={activities}
+                  onActivitesLoaded={(activities, breaches) => {
+                    setActivites(activities);
+                    setBreaches(breaches);
+                  }}
+                  triggerReset={fullResetTrigger}
+                />
               </div>
             </div>
           </div>
@@ -372,10 +381,12 @@ function App() {
           <div className="col bg-border">
             <ActivityTimeline
               activities={activities}
-              selectedActivity={selectedActivity}
               breachCounters={breachCounters}
+              breaches={breaches}
+              selectedActivity={selectedActivity}
               onActivitySelect={updateSelectedActivity}
               onCounterSelect={updateSelectedCounter}
+              onBreachSelect={(breach) => onBreachSelectUpdate(breach, true)}
             />
           </div>
         </div>

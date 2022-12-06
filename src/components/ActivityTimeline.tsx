@@ -7,10 +7,12 @@ import { useEffect, useState } from 'react';
 import ReactCalendarTimeline from 'react-calendar-timeline';
 import { BreachResult } from '../services/FatigueApi';
 import { RuleBreachCounter, RuleType } from '../models/RuleBreachCounter';
+import { SubBreach } from '../models/BreachMapper';
 
 const groups = [
   { id: 1, title: 'activities' },
-  { id: 2, title: '14 Day' },
+  { id: 2, title: '14 Day Actual' },
+  { id: 3, title: '14 Day Expected' },
 ];
 
 /** 
@@ -49,9 +51,11 @@ interface TimeLineActivity {
 export const ActivityTimeline = (props: {
   activities: Activity[];
   breachCounters: RuleBreachCounter[];
+  breaches: SubBreach[];
   selectedActivity: Activity | undefined;
   onActivitySelect: (activity: Activity) => void;
   onCounterSelect: (counter: RuleBreachCounter) => void;
+  onBreachSelect: (breach: SubBreach) => void;
 }) => {
   const [tLActivites, setTlActivities] = useState<TimeLineActivity[]>([]);
   const [startActivity, setStartActivity] = useState<TimeLineActivity>();
@@ -74,7 +78,7 @@ export const ActivityTimeline = (props: {
     });
 
     if (props.breachCounters) {
-      newTlActivities = newTlActivities.concat(mapBreachResults(props.breachCounters));
+      newTlActivities = newTlActivities.concat(mapBreachCounterResults(props.breachCounters)).concat(mapSubBreaches(props.breaches));
     }
 
     setTlActivities(newTlActivities);
@@ -82,7 +86,7 @@ export const ActivityTimeline = (props: {
     setEndActivity(newTlActivities[newTlActivities.length - 1]);
   }, [props.activities, props.breachCounters]);
 
-  const mapBreachResults = (breachCounters: RuleBreachCounter[]): TimeLineActivity[] => {
+  const mapBreachCounterResults = (breachCounters: RuleBreachCounter[]): TimeLineActivity[] => {
     const tlActivities: TimeLineActivity[] = breachCounters
       .filter((c) => c.mainRule === RuleType.Day14)
       .map((counter) => {
@@ -102,14 +106,37 @@ export const ActivityTimeline = (props: {
     return tlActivities;
   };
 
+  const mapSubBreaches = (subBreaches: SubBreach[]): TimeLineActivity[] => {
+    const tlActivities: TimeLineActivity[] = subBreaches
+      .filter((b) => b.mainBreach.type === RuleType.Day14)
+      .map((breach) => {
+        return {
+          id: breach.id + 2000,
+          group: 3,
+          title: breach.name,
+          start_time: moment(breach.activity.startTime),
+          end_time: moment(breach.activity.endTime),
+          itemProps: {
+            style: {
+              'background-color': 'orange',
+            },
+          },
+        };
+      });
+    return tlActivities;
+  };
+
   const onActivitySelect = (id: number) => {
     console.log('selectedTimeplineActivityId', id);
-    if (id < 1000) {
-      const activity = props.activities.find((act) => act.id === id - 1);
-      if (activity) props.onActivitySelect(activity);
-    } else {
+    if (id >= 2000) {
+      const breach = props.breaches.find((breach) => breach.id === id - 2000);
+      if (breach) props.onBreachSelect(breach);
+    } else if (id >= 1000) {
       const counter = props.breachCounters.find((act) => act.id === id - 1000);
       if (counter) props.onCounterSelect(counter);
+    } else {
+      const activity = props.activities.find((act) => act.id === id - 1);
+      if (activity) props.onActivitySelect(activity);
     }
   };
 

@@ -5,18 +5,17 @@ import { Activity, IBaseActivity } from '../models/Activity';
 import { dateToEpoch } from '../utils/dateUtils';
 import { LoadActivityFileConfirmation, SaveActivityAsFileConfirmation } from './Modals';
 import { getActivityFileNames, getActivityList, saveActivitiesList } from '../services/FatigueApi';
+import { SubBreach } from '../models/BreachMapper';
 
-export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[]; onActivitesLoaded: (activities: Activity[]) => void }) => {
+export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[]; onActivitesLoaded: (activities: Activity[], breaches: SubBreach[]) => void }) => {
   const [triggerSave, setTriggerSave] = useState(false);
   const [triggerLoad, setTriggerLoad] = useState(false);
   /**activity list file names */
   const [fileNames, setFileNames] = useState<string[]>([]);
-  const [selectedFileName, setSelectedFileName] = useState('');
   const resetPrevRef = useRef(false);
 
   useEffect(() => {
     if (resetPrevRef.current !== props.triggerReset) {
-      setSelectedFileName('');
       resetPrevRef.current = props.triggerReset;
     }
   }, [props.triggerReset]);
@@ -37,9 +36,9 @@ export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[];
     getActivityList(fileName)
       .then((baseActivities) => {
         console.log('base activities', baseActivities);
-        props.onActivitesLoaded(mapBaseActivities(baseActivities));
+        const { finalActivities, finalBreaches } = mapBaseActivities(baseActivities);
+        props.onActivitesLoaded(finalActivities, finalBreaches);
         toast.success('Load Activities success');
-        setSelectedFileName(fileName);
       })
       .catch((error) => {
         toast.error('Load Activities Failed');
@@ -47,19 +46,36 @@ export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[];
       });
   };
 
-  const mapBaseActivities = (baseActivities: IBaseActivity[]): Activity[] => {
+  const mapBaseActivities = (baseActivities: IBaseActivity[]) => {
     //add epochTime(=startTimeS) variable and sort list using it
     const sortedBaseActivities = baseActivities.map((act) => ({ ...act, startTimeS: dateToEpoch(act.startTime) })).sort((a, b) => a.startTimeS - b.startTimeS);
     const lastActivityIndex = baseActivities.length - 1;
+    const finalActivities: Activity[] = [];
+    const finalBreaches: SubBreach[] = [];
 
-    return sortedBaseActivities.map((bActivity, index) => {
+    let breachCounter = 0;
+    sortedBaseActivities.forEach((bActivity, index) => {
+      //-------activity mapping---------
+      let activity: Activity;
       if (index < lastActivityIndex) {
-        if (!sortedBaseActivities[index + 1]) console.log('invalid activity at ', index + 1);
-        return Activity.withEndTime(index, bActivity.startTime, bActivity.type, sortedBaseActivities[index + 1].startTime);
+        if (!sortedBaseActivities[index + 1]) throw Error('invalid activity at :' + (index + 1));
+        activity = Activity.withEndTime(index, bActivity.startTime, bActivity.type, sortedBaseActivities[index + 1].startTime);
       } else {
-        return Activity.asLastActivity(index, bActivity.startTime, bActivity.type);
+        activity = Activity.asLastActivity(index, bActivity.startTime, bActivity.type);
+      }
+      finalActivities.push(activity);
+      //-------breach mapping---------
+      if (bActivity.breaches) {
+        bActivity.breaches.forEach((breach) => {
+          const subBreach = new SubBreach(breachCounter, breach, activity);
+          finalBreaches.push(subBreach);
+          activity.addBreach(subBreach);
+          breachCounter++;
+        });
       }
     });
+
+    return { finalActivities, finalBreaches };
   };
 
   const saveActivities = (fileName: string) => {
