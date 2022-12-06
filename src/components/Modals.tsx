@@ -194,6 +194,12 @@ export const AddBreachDialog = (props: { trigger: boolean; onConfirmation: (subB
 
   const handleShow = () => setShow(true);
 
+  const getNhvrName = () => {
+    const subBreachItem = breachListItems.find((sBreach) => sBreach.id === selectedSubBreachId);
+    if (subBreachItem) return subBreachItem.subBreach.documentReference.name;
+    return '';
+  };
+
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
@@ -201,14 +207,17 @@ export const AddBreachDialog = (props: { trigger: boolean; onConfirmation: (subB
       </Modal.Header>
       <Modal.Body>
         <div className="container mt-2">
-          <Form.Label>Enter file name</Form.Label>
-          <Form.Select onChange={(e) => setSelectedSubBreachId(Number(e.target.value))}>
-            {breachListItems.map((sBreach, index) => (
-              <option value={sBreach.id} key={index}>
-                {sBreach.subBreach.name}
-              </option>
-            ))}
-          </Form.Select>
+          <div className="row flex-column">
+            <Form.Label>Select Breach</Form.Label>
+            <Form.Select onChange={(e) => setSelectedSubBreachId(Number(e.target.value))}>
+              {breachListItems.map((sBreach, index) => (
+                <option value={sBreach.id} key={index}>
+                  {sBreach.subBreach.name}
+                </option>
+              ))}
+            </Form.Select>
+            <Form.Label className="mt-3">NHVR REF : {getNhvrName()}</Form.Label>
+          </div>
         </div>
       </Modal.Body>
       <Modal.Footer>
