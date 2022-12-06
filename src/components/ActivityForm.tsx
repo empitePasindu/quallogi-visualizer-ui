@@ -3,9 +3,9 @@ import { Formik } from 'formik';
 import DatePicker from 'react-datepicker';
 import * as Yup from 'yup';
 import 'react-datepicker/dist/react-datepicker.css';
-import { Activity, ActivityType } from './Activity';
+import { Activity, ActivityType } from '../models/Activity';
 import { useEffect, useState } from 'react';
-import { dateToLocalDate, getDurationFromSeconds, nowTime } from './dateUtils';
+import { dateToLocalDate, getDurationFromSeconds, nowTime } from '../utils/dateUtils';
 
 type DatePickerProps = {
   name: any;

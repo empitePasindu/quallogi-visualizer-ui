@@ -2,11 +2,11 @@
 import 'react-calendar-timeline/lib/Timeline.css';
 import Timeline from 'react-calendar-timeline';
 import moment from 'moment';
-import { Activity, ActivityType } from './Activity';
+import { Activity, ActivityType } from '../models/Activity';
 import { useEffect, useState } from 'react';
 import ReactCalendarTimeline from 'react-calendar-timeline';
-import { BreachResult } from './service/FatigueApi';
-import { RuleBreachCounter, RuleType } from './RuleBreachCounter';
+import { BreachResult } from '../services/FatigueApi';
+import { RuleBreachCounter, RuleType } from '../models/RuleBreachCounter';
 
 const groups = [
   { id: 1, title: 'activities' },

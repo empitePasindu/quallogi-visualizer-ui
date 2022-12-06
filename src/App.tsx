@@ -3,19 +3,19 @@ import logo from './logo.svg';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
-import { ActivityForm, ActivityFormData } from './ActivityForm';
-import { ActivityList } from './ActivityList';
-import { Activity, ActivityType, Duration, IActivity } from './Activity';
+import { ActivityForm, ActivityFormData } from './components/ActivityForm';
+import { ActivityList } from './components/ActivityList';
+import { Activity, ActivityType, Duration, IActivity } from './models/Activity';
 import { InputGroup, Form, Button } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
-import * as du from './dateUtils';
-import { DeleteActivityConfirmation, DeleteOption } from './Modals';
-import { ActivityTimeline } from './ActivityTimeline';
-import { BreachResult, getBFMBreaches } from './service/FatigueApi';
-import { RuleBreachCounter } from './RuleBreachCounter';
-import { BreachedCounterList } from './BreachedCounterList';
-import { SaveLoad } from './SaveLoad';
-import { scrollToElement } from './utils';
+import * as du from './utils/dateUtils';
+import { DeleteActivityConfirmation, DeleteOption } from './components/Modals';
+import { ActivityTimeline } from './components/ActivityTimeline';
+import { BreachResult, getBFMBreaches } from './services/FatigueApi';
+import { RuleBreachCounter } from './models/RuleBreachCounter';
+import { BreachedCounterList } from './components/BreachedCounterList';
+import { SaveLoad } from './components/SaveLoad';
+import { scrollToElement } from './utils/utils';
 
 type ActivityInputOptions = {
   /**append new activity to bottom*/

@@ -1,6 +1,6 @@
 import { ActivityType } from './Activity';
-import * as du from './dateUtils';
-import { Breached, RuleBreach } from './service/FatigueApi';
+import * as du from '../utils/dateUtils';
+import { Breached, RuleBreach } from '../services/FatigueApi';
 
 //TODO add remaining rule types
 export enum RuleType {

@@ -1,4 +1,4 @@
-import { IActivity, IBaseActivity } from '../Activity';
+import { IActivity, IBaseActivity } from '../models/Activity';
 
 const BASE_URL = 'http://localhost:3300/';
 const GET_BREACHES_API = BASE_URL + 'get-breaches';

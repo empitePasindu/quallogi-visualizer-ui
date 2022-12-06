@@ -3,7 +3,7 @@ import duration from 'dayjs/plugin/duration';
 import timezone from 'dayjs/plugin/timezone';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
-import { Duration } from './Activity';
+import { Duration } from '../models/Activity';
 const timeZone = 'Australia/Melbourne'; //GMT+11
 const timeFormat = 'YYYY-MM-DDTHH:mm:ssZ';
 const timeFormatSimple = 'DD/MM HH:mm';

@@ -1,6 +1,6 @@
-import { Activity, ActivityType } from './Activity';
-import { toSimpleDateString } from './dateUtils';
-import { RuleBreachCounter } from './RuleBreachCounter';
+import { Activity, ActivityType } from '../models/Activity';
+import { toSimpleDateString } from '../utils/dateUtils';
+import { RuleBreachCounter } from '../models/RuleBreachCounter';
 
 type BreachedCounterProps = {
   breachCounter: RuleBreachCounter[];

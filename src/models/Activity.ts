@@ -1,4 +1,4 @@
-import * as du from './dateUtils';
+import * as du from '../utils/dateUtils';
 
 export enum ActivityType {
   rest = 'rest',

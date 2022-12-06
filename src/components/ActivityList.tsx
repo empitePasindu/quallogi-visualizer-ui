@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from 'react';
-import { Activity, ActivityType } from './Activity';
-import { toSimpleDateString } from './dateUtils';
-import { scrollToElement } from './utils';
+import { Activity, ActivityType } from '../models/Activity';
+import { toSimpleDateString } from '../utils/dateUtils';
+import { scrollToElement } from '../utils/utils';
 
 type ActivityProps = {
   selectedActivity: Activity | undefined;
