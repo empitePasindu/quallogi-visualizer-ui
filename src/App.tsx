@@ -137,14 +137,18 @@ function App() {
       minutes: activityInput.minutes,
     });
   };
-  /**sets or clears the activity selection*/
-  const updateSelectedActivity = (selectedActivity: Activity | null) => {
+  /**sets or clears the activity selection
+   * @param updateBreaches highlights corresponding breaches for the selected activity
+   */
+  const updateSelectedActivity = (selectedActivity: Activity | null, updateBreaches = true) => {
     activities.forEach((activity) => {
       if (activity.id === selectedActivity?.id) {
         activity.setSelected(true);
         //updated by reference ,so no need to map with original breach list
-        breaches.forEach((breach) => breach.setSelected(false));
-        activity.getBreaches().forEach((sBreach) => sBreach.setSelected(true));
+        if (updateBreaches) {
+          breaches.forEach((breach) => breach.setSelected(false));
+          activity.getBreaches().forEach((sBreach) => sBreach.setSelected(true));
+        }
       } else activity.setSelected(false);
     });
     setActivites([...activities]);
@@ -165,7 +169,7 @@ function App() {
   const onBreachSelectUpdate = (breach: SubBreach | null) => {
     updateSelectedBreach(breach);
     if (breach) {
-      updateSelectedActivity(breach.activity);
+      updateSelectedActivity(breach.activity, false);
     }
   };
 
