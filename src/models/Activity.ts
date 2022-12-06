@@ -1,4 +1,5 @@
 import * as du from '../utils/dateUtils';
+import { SubBreach } from './BreachMapper';
 
 export enum ActivityType {
   rest = 'rest',
@@ -44,6 +45,8 @@ export class Activity implements IActivity {
    */
   isLastActivity = false;
 
+  private breaches: SubBreach[] = [];
+
   //-------UI--------
   /**used to set as selected element */
   selected = false;
@@ -77,14 +80,29 @@ export class Activity implements IActivity {
   }
 
   public getTotalWorkHumanized() {
-    return du.secondsToISO(this.totalWork).replace('P', '').replace('T', '');
+    return this.totalWork === 0 ? '' : du.secondsToISO(this.totalWork).replace('P', '').replace('T', '');
   }
   public getTotalRestHumanized() {
-    return du.secondsToISO(this.totalRest).replace('P', '').replace('T', '');
+    return this.totalRest === 0 ? '' : du.secondsToISO(this.totalRest).replace('P', '').replace('T', '');
   }
   public resetTotalDurations() {
     this.totalRest = 0;
     this.totalWork = 0;
+  }
+
+  public addBreach(subBreach: SubBreach) {
+    this.breaches.push(subBreach);
+  }
+  public removeBreach(subBreach: SubBreach) {
+    this.breaches = this.breaches.filter((sBreach) => sBreach.id !== subBreach.id);
+  }
+
+  public getBreaches() {
+    return this.breaches;
+  }
+
+  public hasBreaches() {
+    return this.breaches.length > 0;
   }
   /**moves the activity(startTime and endTime) forward (duration>0) or backward(duration<0) by the given duration
    *

@@ -3,7 +3,7 @@ import { Activity, ActivityType } from '../models/Activity';
 import { toSimpleDateString } from '../utils/dateUtils';
 import { scrollToElement } from '../utils/utils';
 
-type ActivityProps = {
+type ActivityListProps = {
   selectedActivity: Activity | undefined;
   activities: Activity[];
   onActivityClick: (activity: Activity) => void;
@@ -19,7 +19,9 @@ const ActivityItem = (props: { activity: Activity; onClick: (activity: Activity)
       }}
     >
       <div className="row" style={{ backgroundColor: props.activity.selected ? 'lightblue' : '' }}>
-        <div className="col-1 bg-border">{props.activity.id}</div>
+        <div className="col-1 bg-border" style={{ backgroundColor: props.activity.hasBreaches() ? 'lightpink' : '' }}>
+          {props.activity.id}
+        </div>
         <div className="col-5 bg-border">{toSimpleDateString(props.activity.startTime)}</div>
         <div className="col-4 bg-border" style={{ backgroundColor: props.activity.type === ActivityType.rest ? 'lightgreen' : 'lightyellow' }}>
           <div className="d-flex justify-content-around">
@@ -33,7 +35,7 @@ const ActivityItem = (props: { activity: Activity; onClick: (activity: Activity)
   );
 };
 
-export const ActivityList = ({ selectedActivity, activities, onActivityClick }: ActivityProps) => {
+export const ActivityList = ({ selectedActivity, activities, onActivityClick }: ActivityListProps) => {
   const itemClickedRef = useRef(false);
   useLayoutEffect(() => {
     if (!itemClickedRef.current && selectedActivity) scrollToElement('act-' + selectedActivity.id);

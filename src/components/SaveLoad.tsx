@@ -6,7 +6,7 @@ import { dateToEpoch } from '../utils/dateUtils';
 import { LoadActivityFileConfirmation, SaveActivityAsFileConfirmation } from './Modals';
 import { getActivityFileNames, getActivityList, saveActivitiesList } from '../services/FatigueApi';
 
-export const SaveLoad = (props: { triggerReset: boolean; activities: IBaseActivity[]; onActivitesLoaded: (activities: Activity[]) => void }) => {
+export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[]; onActivitesLoaded: (activities: Activity[]) => void }) => {
   const [triggerSave, setTriggerSave] = useState(false);
   const [triggerLoad, setTriggerLoad] = useState(false);
   /**activity list file names */

@@ -9,13 +9,15 @@ import { Activity, ActivityType, Duration, IActivity } from './models/Activity';
 import { InputGroup, Form, Button } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import * as du from './utils/dateUtils';
-import { DeleteActivityConfirmation, DeleteOption } from './components/Modals';
+import { AddBreachDialog, DeleteActivityConfirmation, DeleteOption } from './components/Modals';
 import { ActivityTimeline } from './components/ActivityTimeline';
 import { BreachResult, getBFMBreaches } from './services/FatigueApi';
 import { RuleBreachCounter } from './models/RuleBreachCounter';
 import { BreachedCounterList } from './components/BreachedCounterList';
 import { SaveLoad } from './components/SaveLoad';
 import { scrollToElement } from './utils/utils';
+import { BreachList } from './components/BreachList';
+import { ISubBreach, SubBreach } from './models/BreachMapper';
 
 type ActivityInputOptions = {
   /**append new activity to bottom*/
@@ -26,6 +28,7 @@ type ActivityInputOptions = {
 
 function App() {
   const [activities, setActivites] = useState<Activity[]>([]);
+  const [breaches, setBreaches] = useState<SubBreach[]>([]);
   const [breachCounters, setBreachCounters] = useState<RuleBreachCounter[]>([]);
 
   const [breachResult, setBreachResult] = useState<BreachResult>();
@@ -33,6 +36,7 @@ function App() {
 
   /**activity selected */
   const [selectedActivity, setSelectedActivity] = useState<Activity>();
+  const [selectedBreach, setSelectedBreach] = useState<SubBreach>();
 
   /**duration add start point */
   const [durationAddStartActivity, setDurationAddStartActivity] = useState<Activity>();
@@ -45,6 +49,7 @@ function App() {
   const [resetForm, setResetForm] = useState(false);
   const [fullResetTrigger, setFullResetTrigger] = useState(false);
   const [triggerDeleteConfirmation, setTriggerDeleteConfirmation] = useState(false);
+  const [triggerAddBreachDialog, setTriggerAddBreachDialog] = useState(false);
 
   const addActivity = (startDate: string, type: ActivityType, duration: Duration) => {
     if (duration.days === 0 && duration.hours === 0 && duration.minutes === 0) {
@@ -73,6 +78,14 @@ function App() {
     console.log('has selectedActivity');
 
     //if activity is selected for modification adjust all the durations of that activity and in the activities after that
+  };
+
+  const addBreach = (rawSubBreach: ISubBreach) => {
+    if (!selectedActivity) return;
+    const newBreach = new SubBreach(breaches.length, rawSubBreach, selectedActivity);
+    selectedActivity.addBreach(newBreach);
+    breaches.push(newBreach);
+    setBreaches([...breaches]);
   };
 
   useEffect(() => {
@@ -111,6 +124,12 @@ function App() {
     }
   };
 
+  const removeSelectedBreach = () => {
+    if (!selectedBreach) return;
+    activities.forEach((act) => act.removeBreach(selectedBreach));
+    setBreaches([...breaches.filter((breach) => breach.id !== selectedBreach.id)]);
+  };
+
   const onActivityAdd = (activityInput: ActivityFormData) => {
     addActivity(du.localDateToString(activityInput.startDate), activityInput.type as ActivityType, {
       days: activityInput.days,
@@ -123,10 +142,31 @@ function App() {
     activities.forEach((activity) => {
       if (activity.id === selectedActivity?.id) {
         activity.setSelected(true);
+        //updated by reference ,so no need to map with original breach list
+        breaches.forEach((breach) => breach.setSelected(false));
+        activity.getBreaches().forEach((sBreach) => sBreach.setSelected(true));
       } else activity.setSelected(false);
     });
     setActivites([...activities]);
     setSelectedActivity(selectedActivity ? selectedActivity : undefined);
+    setBreaches([...breaches]);
+  };
+  /**sets or clears the breach selection*/
+  const updateSelectedBreach = (selectedBreach: SubBreach | null) => {
+    breaches.forEach((breach) => {
+      if (breach.id === selectedBreach?.id) {
+        breach.setSelected(true);
+      } else breach.setSelected(false);
+    });
+    setBreaches([...breaches]);
+    setSelectedBreach(selectedBreach ? selectedBreach : undefined);
+  };
+
+  const onBreachSelectUpdate = (breach: SubBreach | null) => {
+    updateSelectedBreach(breach);
+    if (breach) {
+      updateSelectedActivity(breach.activity);
+    }
   };
 
   /**sets or clears the counter selection*/
@@ -175,13 +215,16 @@ function App() {
   const resetSelections = () => {
     updateSelectedActivity(null);
     updateSelectedCounter(null);
+    updateSelectedBreach(null);
   };
 
   const resetAll = () => {
     updateSelectedActivity(null);
     updateSelectedCounter(null);
+    updateSelectedBreach(null);
     setActivites([]);
     setBreachCounters([]);
+    setBreaches([]);
     setFullResetTrigger((trig) => !trig);
   };
 
@@ -258,7 +301,7 @@ function App() {
           <ActivityForm activity={formInputActivity} onSubmit={onActivityAdd} disableDateEdit={activities.length !== 0} reset={resetForm} />
         </div>
         <div className="row">
-          <div className="col-3 d-flex">
+          <div className="col-5 d-flex">
             <Button
               variant="info"
               onClick={() => {
@@ -271,9 +314,28 @@ function App() {
             <div className="mx-3 d-flex">
               <h4 className="align-self-center">{durationAddStartActivity?.id}</h4>
             </div>
+            <Button
+              className="mx-2"
+              variant="warning"
+              onClick={() => {
+                setTriggerAddBreachDialog((val) => !val);
+              }}
+              disabled={!selectedActivity}
+            >
+              Add Breach
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => {
+                removeSelectedBreach();
+              }}
+              disabled={!selectedBreach}
+            >
+              Remove Breach
+            </Button>
           </div>
         </div>
-        <div className="row bg-border">
+        <div className="row bg-border" style={{ fontSize: '0.8em' }}>
           <div className="col bg-border">
             <div className="row bg-border">
               <h4 className="col">Activities</h4>
@@ -283,9 +345,18 @@ function App() {
               </div>
             </div>
           </div>
+          <div className="col-3 bg-border">
+            <div className="row bg-border">
+              <h4 className="col">Expected Breaches</h4>
+              <div className="w-100"></div>
+              <div className="col" style={{ maxHeight: '50vh', overflow: 'scroll' }}>
+                <BreachList breaches={breaches} selectedBreach={selectedBreach} onBreachClick={onBreachSelectUpdate} />
+              </div>
+            </div>
+          </div>
           <div className="col bg-border">
             <div className="row bg-border">
-              <h4 className="col">Breaches</h4>
+              <h4 className="col">Actual Breaches</h4>
               <div className="w-100"></div>
               <div className="col" style={{ maxHeight: '50vh', overflow: 'scroll' }}>
                 <BreachedCounterList breachCounter={breachCounters} onCounterClick={updateSelectedCounter} />
@@ -307,6 +378,7 @@ function App() {
       </div>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss pauseOnHover theme="colored" />
       <DeleteActivityConfirmation trigger={triggerDeleteConfirmation} onConfirmation={removeSelectedActivity} />
+      <AddBreachDialog trigger={triggerAddBreachDialog} onConfirmation={addBreach} />
     </>
   );
 }
