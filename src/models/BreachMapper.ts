@@ -77,4 +77,8 @@ export class SubBreach implements ISubBreach {
   setSelected(select: boolean) {
     this.selected = select;
   }
+  /**to remove circular referance when saving the activities */
+  public getSaveObject(): ISubBreach {
+    return { name: this.name, description: this.description, documentReference: this.documentReference };
+  }
 }

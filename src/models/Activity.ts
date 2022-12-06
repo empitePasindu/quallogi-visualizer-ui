@@ -1,5 +1,5 @@
 import * as du from '../utils/dateUtils';
-import { SubBreach } from './BreachMapper';
+import { ISubBreach, SubBreach } from './BreachMapper';
 
 export enum ActivityType {
   rest = 'rest',
@@ -15,6 +15,7 @@ export interface Duration {
 export interface IBaseActivity {
   startTime: string;
   type: ActivityType;
+  breaches?: ISubBreach[];
 }
 
 export interface IActivity extends IBaseActivity {
@@ -45,7 +46,7 @@ export class Activity implements IActivity {
    */
   isLastActivity = false;
 
-  private breaches: SubBreach[] = [];
+  breaches: SubBreach[] = [];
 
   //-------UI--------
   /**used to set as selected element */
