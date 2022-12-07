@@ -116,15 +116,10 @@ export async function getActivityFileNames(): Promise<string[]> {
   }
 }
 /**saves activities as json file with the given fileName */
-export async function saveActivitiesList(activities: Activity[], fileName: string) {
+export async function saveActivitiesList(activities: IBaseActivity[], fileName: string) {
   const response = await fetch(SAVE_ACTIVITY_API, {
     method: 'POST',
-    body: JSON.stringify({
-      activities: activities.map(
-        (act): IBaseActivity => ({ startTime: act.startTime, type: act.type, breaches: act.breaches ? act.breaches.map((b) => b.getSaveObject()) : undefined }),
-      ),
-      fileName: fileName,
-    }),
+    body: JSON.stringify({ activities: activities, fileName: fileName }),
     headers: {
       'Content-Type': 'application/json',
     },

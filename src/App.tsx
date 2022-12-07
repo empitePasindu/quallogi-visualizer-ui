@@ -18,6 +18,7 @@ import { SaveLoad } from './components/SaveLoad';
 import { scrollToElement } from './utils/utils';
 import { BreachList } from './components/BreachList';
 import { ISubBreach, SubBreach } from './models/BreachMapper';
+import { act } from 'react-dom/test-utils';
 
 export type ActivityInputOptions = {
   /**append new activity to bottom*/
@@ -238,7 +239,7 @@ function App() {
     if (selectedActivity && set) {
       setActivites([...addUpDurations(selectedActivity.id, activities)]);
       setDurationAddStartActivity(selectedActivity);
-    } else {
+    } else if (activities.length > 0) {
       setActivites(
         activities.map((act) => {
           act.resetTotalDurations();
@@ -264,6 +265,18 @@ function App() {
       act.totalWork = workSum;
     });
     return activities;
+  };
+
+  /**
+   * @description Moving all the activites forward or backward by amount equals to lastActivity.endTime - currentTime.
+   *
+   * this is done since the calculation always refers the lastActivity endTime as the currentTime .
+   */
+  const syncActivityTimes = () => {
+    const currentEpoch = du.nowTimeInEpoch();
+    const moveDuration = currentEpoch - (selectedActivity ? selectedActivity.endTimeS : activities[activities.length - 1].endTimeS);
+    activities.forEach((act) => act.moveActivityTimeBy(moveDuration));
+    setActivites([...activities]);
   };
 
   const resetSelections = () => {
@@ -339,6 +352,9 @@ function App() {
                   </Button>
                   <Button variant="success" onClick={() => getBreaches()} disabled={activities.length === 0}>
                     BFM
+                  </Button>
+                  <Button variant="primary" onClick={syncActivityTimes} disabled={activities.length === 0}>
+                    Sync
                   </Button>
                 </div>
               </div>

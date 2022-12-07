@@ -51,8 +51,9 @@ export function secondsToReadable(durationSeconds: number) {
 
 export function secondsToHoursAndMins(durationSeconds: number) {
   const { days, hours, minutes } = secondsToDuration(durationSeconds);
+  console.log(days, hours, minutes);
   const totH = days * 24 + hours;
-  return totH ? totH + 'H' : '' + (minutes ? minutes + 'M' : '');
+  return (totH ? totH + 'H' : '') + (minutes ? minutes + 'M' : '');
 }
 
 /** @returns 1D2H3M,2D3H,.. with up to a minute resolution */
@@ -74,6 +75,10 @@ export function epochToDateStr(epoch: number) {
 
 export function epochToDateObj(epoch: number) {
   return dayjs.unix(epoch).toDate();
+}
+
+export function nowTimeInEpoch() {
+  return dayjs().unix();
 }
 
 export function dateToLocalDate(date: string) {

@@ -1,6 +1,7 @@
 import { ActivityType } from './Activity';
 import * as du from '../utils/dateUtils';
 import { Breached, RuleBreach } from '../services/FatigueApi';
+import { number } from 'yup';
 
 //TODO add remaining rule types
 export enum RuleType {
@@ -8,6 +9,20 @@ export enum RuleType {
   Day7 = '7 day',
   Day = '24H',
   Min15 = '15MIN',
+}
+
+export enum Severity {
+  zero = 0,
+  minor,
+  substantial,
+  severe,
+  critical,
+}
+
+export namespace Severity {
+  export function getKeyByValue(value: number) {
+    return Object.values(Severity)[value];
+  }
 }
 
 /**Represents the breach counter for a given rule  */
@@ -24,6 +39,7 @@ export interface IRuleBreachCounter {
   /** nested condtion of the mainRule */
   subRule: string;
   type: ActivityType;
+  severity: Severity;
 }
 
 function getRuleTypeFromDuration(duration: number): RuleType {
@@ -54,9 +70,11 @@ export class RuleBreachCounter implements IRuleBreachCounter {
   startTimeS: number;
   /**endTime in epoch */
   endTimeS: number;
+  severity: Severity;
+
   selected = false;
   /**@param ruleDurationS 'duration of the rule in seconds'*/
-  constructor(id: number, startPoint: number, endPoint: number, mainRule: RuleType, subRule: string, type: ActivityType) {
+  constructor(id: number, startPoint: number, endPoint: number, mainRule: RuleType, subRule: string, type: ActivityType, severity: number) {
     this.id = id;
     this.startTime = du.epochToDateStr(startPoint);
     this.endTime = du.epochToDateStr(endPoint);
@@ -65,10 +83,15 @@ export class RuleBreachCounter implements IRuleBreachCounter {
     this.type = type;
     this.startTimeS = startPoint;
     this.endTimeS = endPoint;
+    this.severity = severity;
   }
 
   public setSelected(selected: boolean) {
     this.selected = selected;
+  }
+
+  public getSeverityKey() {
+    return Severity.getKeyByValue(this.severity) as string;
   }
   public static fromRuleBreach(id: number, ruleBreach: RuleBreach) {
     // const ruleType = getRuleTypeFromDuration(ruleBreach.duration.minutes*1000)
@@ -76,6 +99,6 @@ export class RuleBreachCounter implements IRuleBreachCounter {
   }
   public static fromBreached(id: number, breached: Breached) {
     const ruleType = getRuleTypeFromPeriod(breached.period);
-    return new RuleBreachCounter(id, breached.startPoint, breached.endPoint, ruleType, breached.ruleset, breached.type as ActivityType);
+    return new RuleBreachCounter(id, breached.startPoint, breached.endPoint, ruleType, breached.ruleset, breached.type as ActivityType, breached.severity);
   }
 }

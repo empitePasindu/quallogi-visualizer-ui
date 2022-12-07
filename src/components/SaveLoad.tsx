@@ -61,7 +61,9 @@ export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[];
         if (!sortedBaseActivities[index + 1]) throw Error('invalid activity at :' + (index + 1));
         activity = Activity.withEndTime(index, bActivity.startTime, bActivity.type, sortedBaseActivities[index + 1].startTime);
       } else {
-        activity = Activity.asLastActivity(index, bActivity.startTime, bActivity.type);
+        //if endTime for last activity doesn't exist the current time is used as the endTime
+        if (bActivity.endTime) activity = Activity.withEndTime(index, bActivity.startTime, bActivity.type, bActivity.endTime);
+        else activity = Activity.asLastActivity(index, bActivity.startTime, bActivity.type);
       }
       finalActivities.push(activity);
       //-------breach mapping---------
@@ -79,7 +81,14 @@ export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[];
   };
 
   const saveActivities = (fileName: string) => {
-    saveActivitiesList(props.activities, fileName)
+    const lastActivityIndex = props.activities.length - 1;
+    const savingActivities: IBaseActivity[] = props.activities.map((act, index): IBaseActivity => {
+      if (lastActivityIndex !== index || (lastActivityIndex === index && !act.endTime))
+        return { startTime: act.startTime, type: act.type, breaches: act.breaches ? act.breaches.map((b) => b.getSaveObject()) : undefined };
+      //add endTime for lastActivity for reference when loading back to get the correct duration
+      else return { startTime: act.startTime, endTime: act.endTime, type: act.type, breaches: act.breaches ? act.breaches.map((b) => b.getSaveObject()) : undefined };
+    });
+    saveActivitiesList(savingActivities, fileName)
       .then((res) => {
         toast.success('File Saved Successfully');
       })

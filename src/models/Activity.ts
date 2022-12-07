@@ -15,6 +15,13 @@ export interface Duration {
 
 export interface IBaseActivity {
   startTime: string;
+  /**endTime is saved when saving activities from the app and is used if available when loading the activities back
+   *
+   * This is needed only(but no required) for the last activity to determine its endTime
+   *
+   * If the last activity endTime doesn't exist refer mapBaseActivities function in SaveLoad.tsx for the default behaviour
+   */
+  endTime?: string;
   type: ActivityType;
   breaches?: ISubBreach[];
 }
