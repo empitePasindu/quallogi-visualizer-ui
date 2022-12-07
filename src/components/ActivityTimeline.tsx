@@ -8,6 +8,7 @@ import ReactCalendarTimeline from 'react-calendar-timeline';
 import { BreachResult } from '../services/FatigueApi';
 import { RuleBreachCounter, RuleType } from '../models/RuleBreachCounter';
 import { SubBreach } from '../models/BreachMapper';
+import { epochToDateObj, getSecondsFromDuration } from '../utils/dateUtils';
 
 const groups = [
   { id: 1, title: 'activities' },
@@ -43,8 +44,10 @@ interface TimeLineActivity {
   id: number;
   group: number;
   title: string;
-  start_time: moment.Moment;
-  end_time: moment.Moment;
+  /**epoch time in milliseconds */
+  start_time: number;
+  /**epoch time in milliseconds */
+  end_time: number;
   itemProps?: any;
 }
 
@@ -67,11 +70,11 @@ export const ActivityTimeline = (props: {
         id: act.id + 1,
         group: 1,
         title: act.type.toUpperCase() + ' ' + act.id,
-        start_time: moment(act.startTime),
-        end_time: moment(act.endTime),
+        start_time: act.startTimeS * 1000,
+        end_time: act.endTimeS * 1000,
         itemProps: {
           style: {
-            'background-color': act.type === ActivityType.rest ? 'green' : 'red',
+            backgroundColor: act.type === ActivityType.rest ? 'green' : 'red',
           },
         },
       };
@@ -80,10 +83,11 @@ export const ActivityTimeline = (props: {
     if (props.breachCounters) {
       newTlActivities = newTlActivities.concat(mapBreachCounterResults(props.breachCounters)).concat(mapSubBreaches(props.breaches));
     }
-
+    newTlActivities.sort((a, b) => a.start_time - b.start_time);
     setTlActivities(newTlActivities);
     setStartActivity(newTlActivities[0]);
     setEndActivity(newTlActivities[newTlActivities.length - 1]);
+    console.log('newTlActivities', newTlActivities);
   }, [props.activities, props.breachCounters]);
 
   const mapBreachCounterResults = (breachCounters: RuleBreachCounter[]): TimeLineActivity[] => {
@@ -94,8 +98,8 @@ export const ActivityTimeline = (props: {
           id: counter.id + 1000,
           group: 2,
           title: counter.subRule.split('>>')[0],
-          start_time: moment(counter.startTime),
-          end_time: moment(counter.endTime),
+          start_time: counter.startTimeS, //moment(counter.startTime),
+          end_time: counter.endTimeS, //moment(counter.endTime),
           itemProps: {
             style: {
               'background-color': counter.type === ActivityType.rest ? 'blue' : 'orange',
@@ -107,6 +111,7 @@ export const ActivityTimeline = (props: {
   };
 
   const mapSubBreaches = (subBreaches: SubBreach[]): TimeLineActivity[] => {
+    console.log('mapSubBreaches', subBreaches);
     const tlActivities: TimeLineActivity[] = subBreaches
       .filter((b) => b.mainBreach.type === RuleType.Day14)
       .map((breach) => {
@@ -114,11 +119,11 @@ export const ActivityTimeline = (props: {
           id: breach.id + 2000,
           group: 3,
           title: breach.name,
-          start_time: moment(breach.activity.startTime),
-          end_time: moment(breach.activity.endTime),
+          start_time: breach.activity.startTimeS * 1000,
+          end_time: breach.activity.endTimeS * 1000,
           itemProps: {
             style: {
-              'background-color': 'orange',
+              backgroundColor: 'orange',
             },
           },
         };
@@ -144,12 +149,13 @@ export const ActivityTimeline = (props: {
     <Timeline
       groups={groups}
       items={tLActivites}
-      defaultTimeStart={startActivity.start_time.subtract(2, 'day')}
-      defaultTimeEnd={endActivity.end_time.add(2, 'day')}
+      defaultTimeStart={epochToDateObj(startActivity.start_time / 1000)}
+      defaultTimeEnd={epochToDateObj(endActivity.end_time / 1000)}
       canMove={false}
       itemHeightRatio={0.75}
       stackItems
       onItemSelect={onActivitySelect}
+      traditionalZoom={true}
     />
   ) : (
     <></>

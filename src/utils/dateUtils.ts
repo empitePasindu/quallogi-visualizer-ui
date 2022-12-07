@@ -61,6 +61,10 @@ export function epochToDateStr(epoch: number) {
   return toDateString(dayjs.unix(epoch));
 }
 
+export function epochToDateObj(epoch: number) {
+  return dayjs.unix(epoch).toDate();
+}
+
 export function dateToLocalDate(date: string) {
   return dayjs(date).toDate();
 }

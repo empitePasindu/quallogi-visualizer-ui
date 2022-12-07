@@ -92,7 +92,7 @@ function App() {
       const selectedActivityIndex = selectedActivity.id;
       const updatedDuration = du.getSecondsFromDuration(duration);
       const durationOffset = updatedDuration - selectedActivity.duration;
-      if (durationOffset === 0) toast.info('New and prev durations are same,Nothing to modify');
+      if (durationOffset === 0) toast.info('New and prev durations are same and type is same,Nothing to modify');
       activities.forEach((activity, index) => {
         if (moveOption === MoveOption.moveBeforeActivities && index < selectedActivityIndex) {
           activity.moveActivityTimeBy(durationOffset * -1);
