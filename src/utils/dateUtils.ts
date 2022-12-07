@@ -51,7 +51,8 @@ export function secondsToReadable(durationSeconds: number) {
 
 export function secondsToHoursAndMins(durationSeconds: number) {
   const { days, hours, minutes } = secondsToDuration(durationSeconds);
-  return (days ? days * 24 + hours + 'H' : '') + (minutes ? minutes + 'M' : '');
+  const totH = days * 24 + hours;
+  return totH ? totH + 'H' : '' + (minutes ? minutes + 'M' : '');
 }
 
 /** @returns 1D2H3M,2D3H,.. with up to a minute resolution */
