@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import * as du from '../utils/dateUtils';
 import { ISubBreach, SubBreach } from './BreachMapper';
 
@@ -73,7 +74,7 @@ export class Activity implements IActivity {
 
     this.startTimeS = du.dateToEpoch(this.startTime);
     this.endTimeS = du.dateToEpoch(this.endTime);
-    this.durationStr = this.duration > 0 ? du.secondsToReadable(this.duration) : '0';
+    this.durationStr = this.duration > 0 ? du.secondsToHoursAndMins(this.duration) : '0';
   }
 
   setSelected(selected: boolean) {
@@ -81,10 +82,10 @@ export class Activity implements IActivity {
   }
 
   getTotalWorkHumanized() {
-    return this.totalWork === 0 ? '' : du.secondsToISO(this.totalWork).replace('P', '').replace('T', '');
+    return this.totalWork === 0 ? '' : du.secondsToHoursAndMins(this.totalWork);
   }
   getTotalRestHumanized() {
-    return this.totalRest === 0 ? '' : du.secondsToISO(this.totalRest).replace('P', '').replace('T', '');
+    return this.totalRest === 0 ? '' : du.secondsToHoursAndMins(this.totalRest);
   }
   resetTotalDurations() {
     this.totalRest = 0;

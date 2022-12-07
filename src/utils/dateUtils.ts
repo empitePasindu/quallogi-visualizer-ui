@@ -48,11 +48,21 @@ export function timeDiff(startTime: string, endTime: string): number {
 export function secondsToReadable(durationSeconds: number) {
   return dayjs.duration(durationSeconds, 'second').humanize();
 }
+
+export function secondsToHoursAndMins(durationSeconds: number) {
+  const { days, hours, minutes } = secondsToDuration(durationSeconds);
+  return (days ? days * 24 + hours + 'H' : '') + (minutes ? minutes + 'M' : '');
+}
+
 /** @returns 1D2H3M,2D3H,.. with up to a minute resolution */
 export function secondsToISO(durationSeconds: number) {
   return dayjs.duration(Math.floor(durationSeconds / 60), 'minute').toISOString();
 }
 
+export function secondsToDuration(durationSeconds: number) {
+  const dur = dayjs.duration(durationSeconds, 'second');
+  return { days: dur.get('day'), hours: dur.get('hour'), minutes: dur.get('minute') };
+}
 export function dateToEpoch(date: string) {
   return dayjs(date).unix();
 }

@@ -34,6 +34,7 @@ if (id < 1000) {
     });
   ```
 
-```
+### Features
 
-```
+- submitting to BFM after clicking on an activity will only process upto the selected activity .If no selected element ,total activity list will be submitted
+-

@@ -286,7 +286,7 @@ function App() {
   const getBreaches = async () => {
     setLoading(true);
     const startTime = Date.now();
-    const result = await getBFMBreaches(activities);
+    const result = await getBFMBreaches(selectedActivity ? activities.filter((act) => act.id <= selectedActivity.id) : activities);
     console.log('got breaches', result);
     if (result) {
       setBreachResult(result);
