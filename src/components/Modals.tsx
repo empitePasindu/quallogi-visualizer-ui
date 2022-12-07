@@ -92,7 +92,7 @@ export const AddActivityConfirmation = (props: { trigger: boolean; onConfirmatio
             <Form.Check
               className="me-3"
               type="radio"
-              label={'Move Before Activities Backward'}
+              label={'Move Backward'}
               checked={moveOption === MoveOption.moveBeforeActivities}
               onChange={() => setMoveOption(MoveOption.moveBeforeActivities)}
             />
@@ -100,7 +100,7 @@ export const AddActivityConfirmation = (props: { trigger: boolean; onConfirmatio
             <Form.Check
               className="me-3"
               type="radio"
-              label={'Move After Activities Forward'}
+              label={'Move Forward'}
               checked={moveOption === MoveOption.moveAfterActivites}
               onChange={() => setMoveOption(MoveOption.moveAfterActivites)}
             />

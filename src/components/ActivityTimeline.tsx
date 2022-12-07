@@ -98,11 +98,11 @@ export const ActivityTimeline = (props: {
           id: counter.id + 1000,
           group: 2,
           title: counter.subRule.split('>>')[0],
-          start_time: counter.startTimeS, //moment(counter.startTime),
-          end_time: counter.endTimeS, //moment(counter.endTime),
+          start_time: counter.startTimeS * 1000,
+          end_time: counter.endTimeS * 1000,
           itemProps: {
             style: {
-              'background-color': counter.type === ActivityType.rest ? 'blue' : 'orange',
+              backgroundColor: counter.type === ActivityType.rest ? 'blue' : 'orange',
             },
           },
         };
