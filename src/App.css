@@ -49,5 +49,12 @@
 }
 
 .btn {
-  font-size: 0.8em;
+  font-size: 0.9em;
+}
+
+.scroll-list {
+  font-size: 1.2em;
+}
+.scroll-list .date-column {
+  font-size: 1.3em;
 }

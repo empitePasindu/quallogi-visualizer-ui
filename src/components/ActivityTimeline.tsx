@@ -152,10 +152,11 @@ export const ActivityTimeline = (props: {
       defaultTimeStart={epochToDateObj(startActivity.start_time / 1000)}
       defaultTimeEnd={epochToDateObj(endActivity.end_time / 1000)}
       canMove={false}
-      itemHeightRatio={0.75}
+      itemHeightRatio={0.65}
       stackItems
       onItemSelect={onActivitySelect}
       traditionalZoom={true}
+      lineHeight={40}
     />
   ) : (
     <></>

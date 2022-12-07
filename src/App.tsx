@@ -306,7 +306,7 @@ function App() {
 
   return (
     <>
-      <div className="container my-2">
+      <div className="container my-2" style={{ maxWidth: '90vw' }}>
         <div className="row justify-content-start mb-3">
           <div className="col-3 mt-2">
             <InputGroup>
@@ -406,7 +406,7 @@ function App() {
             <div className="row bg-border">
               <h4 className="col">Activities</h4>
               <div className="w-100"></div>
-              <div className="col" style={{ maxHeight: '50vh', overflow: 'scroll' }}>
+              <div className="col scroll-list" style={{ maxHeight: '50vh', overflow: 'scroll' }}>
                 <ActivityList activities={activities} selectedActivity={selectedActivity} onActivityClick={updateSelectedActivity} />
               </div>
             </div>
@@ -415,7 +415,7 @@ function App() {
             <div className="row bg-border">
               <h4 className="col">Expected Breaches</h4>
               <div className="w-100"></div>
-              <div className="col" style={{ maxHeight: '50vh', overflow: 'scroll' }}>
+              <div className="col scroll-list" style={{ maxHeight: '50vh', overflow: 'scroll' }}>
                 <BreachList breaches={breaches} selectedBreach={selectedBreach} onBreachClick={onBreachSelectUpdate} />
               </div>
             </div>
@@ -424,7 +424,7 @@ function App() {
             <div className="row bg-border">
               <h4 className="col">Actual Breaches</h4>
               <div className="w-100"></div>
-              <div className="col" style={{ maxHeight: '50vh', overflow: 'scroll' }}>
+              <div className="col scroll-list" style={{ maxHeight: '50vh', overflow: 'scroll' }}>
                 <BreachedCounterList breachCounter={breachCounters} onCounterClick={updateSelectedCounter} />
               </div>
             </div>

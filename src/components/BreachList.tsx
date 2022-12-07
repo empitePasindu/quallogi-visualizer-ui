@@ -22,7 +22,7 @@ const BreachItem = (props: { breach: SubBreach; onClick: (breach: SubBreach) => 
       <div className="row" style={{ backgroundColor: props.breach.selected ? 'lightblue' : '' }}>
         <div className="col-1 bg-border">{props.breach.id}</div>
         {/* <div className="col-5 bg-border">{toSimpleDateString(props.breach.startTime)}</div> */}
-        <div className="col-4 bg-border" style={{ backgroundColor: 'lightred' }}>
+        <div className="col-4 " style={{ backgroundColor: 'lightred' }}>
           <div className="d-flex justify-content-around">
             <div>{props.breach.name.toUpperCase()}</div>
           </div>

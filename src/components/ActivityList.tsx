@@ -22,7 +22,7 @@ const ActivityItem = (props: { activity: Activity; onClick: (activity: Activity)
         <div className="col-1 bg-border" style={{ backgroundColor: props.activity.hasBreaches() ? 'lightpink' : '' }}>
           {props.activity.id}
         </div>
-        <div className="col-5 bg-border">{toSimpleDateString(props.activity.startTime)}</div>
+        <div className="col-5 bg-border ">{toSimpleDateString(props.activity.startTime)}</div>
         <div className="col-4 bg-border" style={{ backgroundColor: props.activity.type === ActivityType.rest ? 'lightgreen' : 'lightyellow' }}>
           <div className="d-flex justify-content-around">
             <div>{props.activity.type.toUpperCase()}</div>

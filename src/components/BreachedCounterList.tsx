@@ -16,8 +16,8 @@ const BreachedCounterItem = (props: { breachCounter: RuleBreachCounter; onClick:
       }}
     >
       <div className="row" style={{ backgroundColor: props.breachCounter.selected ? 'lightblue' : '' }}>
-        <div className="col-1 bg-border">{props.breachCounter.id}</div>
-        <div className="col-3 bg-border">{toSimpleDateString(props.breachCounter.startTime)}</div>
+        <div className="col-1 bg-border date-column">{props.breachCounter.id}</div>
+        <div className="col-3 bg-border ">{toSimpleDateString(props.breachCounter.startTime)}</div>
         <div className="col-2 bg-border" style={{ backgroundColor: props.breachCounter.type === ActivityType.rest ? 'lightgreen' : 'lightyellow' }}>
           {props.breachCounter.type}
         </div>
