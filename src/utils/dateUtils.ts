@@ -50,7 +50,7 @@ export function secondsToReadable(durationSeconds: number) {
 }
 /** @returns 1D2H3M,2D3H,.. with up to a minute resolution */
 export function secondsToISO(durationSeconds: number) {
-  return dayjs.duration(Math.ceil(durationSeconds / 60), 'minute').toISOString();
+  return dayjs.duration(Math.floor(durationSeconds / 60), 'minute').toISOString();
 }
 
 export function dateToEpoch(date: string) {
@@ -74,14 +74,12 @@ export function getSecondsFromDuration(duration: Duration): number {
 }
 
 export function getDurationFromSeconds(durationSec: number): Duration {
-  const durationObj = dayjs.duration(durationSec, 'second');
-  const days = durationObj.asDays();
-  const hours = durationObj.subtract(days, 'day').asHours();
-  const minutes = durationObj.subtract(days, 'day').subtract(hours, 'hour').asMinutes();
-
+  const days = dayjs.duration(durationSec, 'second').asDays();
+  const hours = dayjs.duration(days - Math.floor(days), 'day').asHours();
+  const minutes = dayjs.duration(hours - Math.floor(hours), 'hour').asMinutes();
   return {
-    days: days,
-    hours: hours,
-    minutes: minutes,
+    days: Math.floor(days), //Math.floor(durationSec / (60 * 60 * 24)),
+    hours: Math.floor(hours), // Math.floor(durationSec / (60 * 60)),
+    minutes: Math.floor(minutes), //Math.floor(durationSec / 60),
   };
 }
