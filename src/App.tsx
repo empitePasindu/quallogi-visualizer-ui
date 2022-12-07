@@ -9,7 +9,7 @@ import { Activity, ActivityType, Duration, IActivity } from './models/Activity';
 import { InputGroup, Form, Button } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import * as du from './utils/dateUtils';
-import { AddBreachDialog, DeleteActivityConfirmation, DeleteOption } from './components/Modals';
+import { AddActivityConfirmation, AddBreachDialog, DeleteActivityConfirmation, MoveOption } from './components/Modals';
 import { ActivityTimeline } from './components/ActivityTimeline';
 import { BreachResult, getBFMBreaches } from './services/FatigueApi';
 import { RuleBreachCounter } from './models/RuleBreachCounter';
@@ -52,7 +52,7 @@ function App() {
   const [triggerDeleteConfirmation, setTriggerDeleteConfirmation] = useState(false);
   const [triggerAddBreachDialog, setTriggerAddBreachDialog] = useState(false);
 
-  const addActivity = (startDate: string, type: ActivityType, duration: Duration) => {
+  const addActivity = (startDate: string, type: ActivityType, duration: Duration, moveOption?: MoveOption) => {
     if (duration.days === 0 && duration.hours === 0 && duration.minutes === 0) {
       toast.error('duration cannot be Zero ');
       return;
@@ -76,9 +76,22 @@ function App() {
       setActivites([...activities, newActivity]);
       return;
     }
-    console.log('has selectedActivity');
+    console.log('running the selected Activity logic moveOption', moveOption, selectedActivity);
+    //if activity is selected add the new activity and move after activities forward
+    const beforeActivityIndex = selectedActivity.id;
+    const durationSeconds = du.getSecondsFromDuration(duration);
+    activities.forEach((activity, index) => {
+      if (moveOption === MoveOption.moveBeforeActivities && index <= beforeActivityIndex) {
+        activity.moveActivityTimeBy(durationSeconds * -1);
+      } else if (moveOption === MoveOption.moveAfterActivites && index > beforeActivityIndex) {
+        activity.moveActivityTimeBy(durationSeconds);
+      }
 
-    //if activity is selected for modification adjust all the durations of that activity and in the activities after that
+      if (index > beforeActivityIndex) activity.id += 1;
+    });
+
+    activities.splice(beforeActivityIndex + 1, 0, Activity.withDuration(beforeActivityIndex + 1, selectedActivity.endTime, type, duration));
+    setActivites([...activities]);
   };
 
   const addBreach = (rawSubBreach: ISubBreach) => {
@@ -103,14 +116,14 @@ function App() {
    *
    * - option===moveAfterActivites >>  moves the after activities backward by the removed activity's duration
    * - option===moveBeforeActivities >>  moves the before activities forward by the removed activity's duration */
-  const removeActivity = (activityId: number, option: DeleteOption) => {
+  const removeActivity = (activityId: number, option: MoveOption) => {
     const targetActivityIndex = activityId;
     if (targetActivityIndex == -1) throw Error('no activity found to delete');
     const targetActivity = activities[targetActivityIndex];
 
     activities.forEach((activity, index) => {
-      if (option === DeleteOption.moveBeforeActivities && index <= targetActivityIndex) activity.moveActivityTimeBy(targetActivity.duration);
-      else if (option === DeleteOption.moveAfterActivites && index >= targetActivityIndex) activity.moveActivityTimeBy(targetActivity.duration * -1);
+      if (option === MoveOption.moveBeforeActivities && index <= targetActivityIndex) activity.moveActivityTimeBy(targetActivity.duration);
+      else if (option === MoveOption.moveAfterActivites && index >= targetActivityIndex) activity.moveActivityTimeBy(targetActivity.duration * -1);
 
       if (index >= targetActivityIndex) activity.id -= 1;
     });
@@ -119,7 +132,7 @@ function App() {
     setSelectedActivity(undefined);
   };
 
-  const removeSelectedActivity = (option: DeleteOption) => {
+  const removeSelectedActivity = (option: MoveOption) => {
     if (selectedActivity) {
       removeActivity(selectedActivity.id, option);
     }
@@ -131,12 +144,17 @@ function App() {
     setBreaches([...breaches.filter((breach) => breach.id !== selectedBreach.id)]);
   };
 
-  const onActivityAdd = (activityInput: ActivityFormData) => {
-    addActivity(du.localDateToString(activityInput.startDate), activityInput.type as ActivityType, {
-      days: activityInput.days,
-      hours: activityInput.hours,
-      minutes: activityInput.minutes,
-    });
+  const onActivityAdd = (activityInput: ActivityFormData, moveOption?: MoveOption) => {
+    addActivity(
+      du.localDateToString(activityInput.startDate),
+      activityInput.type as ActivityType,
+      {
+        days: activityInput.days,
+        hours: activityInput.hours,
+        minutes: activityInput.minutes,
+      },
+      moveOption,
+    );
   };
   /**sets or clears the activity selection
    * @param updateBreaches highlights corresponding breaches for the selected activity
@@ -260,7 +278,7 @@ function App() {
     <>
       <div className="container" style={{ width: '95vw' }}>
         <div className="row justify-content-start mb-3">
-          <div className="col mt-2">
+          <div className="col-3 mt-2">
             <InputGroup>
               <Form.Check
                 className="me-3"
@@ -281,11 +299,8 @@ function App() {
           </div>
           <div className="col">
             <div className="row w-100 ml-2">
-              <div className="col">
-                <div className="d-flex">
-                  <Button variant="danger" onClick={() => setTriggerDeleteConfirmation((val) => !val)} disabled={selectedActivity == null}>
-                    Delete
-                  </Button>
+              <div className="col-4">
+                <div className="d-flex  justify-content-around">
                   <Button variant="info" onClick={resetSelections} disabled={!selectedActivity && !selectedCounter}>
                     Deselect
                   </Button>
@@ -311,7 +326,14 @@ function App() {
           </div>
         </div>
         <div className="row">
-          <ActivityForm activity={formInputActivity} onSubmit={onActivityAdd} disableDateEdit={activities.length !== 0} reset={resetForm} />
+          <ActivityForm
+            inputActivity={formInputActivity}
+            onSubmit={onActivityAdd}
+            onRemove={removeSelectedActivity}
+            disableDateEdit={activities.length !== 0}
+            hasSelectedActivity={selectedActivity != null}
+            reset={resetForm}
+          />
         </div>
         <div className="row">
           <div className="col-5 d-flex">
@@ -392,7 +414,6 @@ function App() {
         </div>
       </div>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss pauseOnHover theme="colored" />
-      <DeleteActivityConfirmation trigger={triggerDeleteConfirmation} onConfirmation={removeSelectedActivity} />
       <AddBreachDialog trigger={triggerAddBreachDialog} onConfirmation={addBreach} />
     </>
   );

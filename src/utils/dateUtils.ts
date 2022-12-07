@@ -29,12 +29,14 @@ export function toSimpleDateString(time: string) {
 export function addDurationToDate(date: string, duration: Duration): Dayjs {
   return dayjs(date).add(duration.days, 'day').add(duration.hours, 'hour').add(duration.minutes, 'minute');
 }
+
 /**add if seconds >  0 ,subtract if seconds < 0 */
 export function addSecondsToDate(date: string, seconds: number): Dayjs {
   return seconds > 0 ? dayjs(date).add(seconds, 'second') : dayjs(date).subtract(Math.abs(seconds), 'second');
 }
 
 export function subtractSecondsFromDate(date: string, seconds: number): Dayjs {
+  console.log('subtracting', date, seconds / 60 / 60);
   return dayjs(date).subtract(seconds, 'second');
 }
 
@@ -65,6 +67,10 @@ export function dateToLocalDate(date: string) {
 
 export function localDateToString(date: Date) {
   return dayjs(date).format(timeFormat);
+}
+
+export function getSecondsFromDuration(duration: Duration): number {
+  return dayjs.duration(duration.minutes, 'minute').add(duration.days, 'day').add(duration.hours, 'hour').asSeconds();
 }
 
 export function getDurationFromSeconds(durationSec: number): Duration {

@@ -91,8 +91,8 @@ export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[];
 
   return (
     <>
-      <div className="d-flex">
-        <Button variant="danger" onClick={showLoadActivities}>
+      <div className="d-flex justify-content-end">
+        <Button variant="danger" className="me-2" onClick={showLoadActivities}>
           Load Activites
         </Button>
         <Button

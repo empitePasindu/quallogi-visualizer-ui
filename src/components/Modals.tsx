@@ -3,14 +3,13 @@ import { Button, Form, InputGroup, Modal } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { getAllSubBreaches, ISubBreach, SubBreach, SubBreachListItem } from '../models/BreachMapper';
 
-export enum DeleteOption {
+export enum MoveOption {
   moveAfterActivites,
   moveBeforeActivities,
 }
-
-export const DeleteActivityConfirmation = (props: { trigger: boolean; onConfirmation: (option: DeleteOption) => void }) => {
+export const DeleteActivityConfirmation = (props: { trigger: boolean; onConfirmation: (option: MoveOption) => void }) => {
   const [show, setShow] = useState(false);
-  const [deleteOption, setDeleteOption] = useState<DeleteOption>(DeleteOption.moveBeforeActivities);
+  const [deleteOption, setDeleteOption] = useState<MoveOption>(MoveOption.moveBeforeActivities);
   const prevStateRef = useRef(false);
   useEffect(() => {
     if (prevStateRef.current !== props.trigger) {
@@ -35,16 +34,16 @@ export const DeleteActivityConfirmation = (props: { trigger: boolean; onConfirma
               className="me-3"
               type="radio"
               label={'Move Before Activities Forward'}
-              checked={deleteOption === DeleteOption.moveBeforeActivities}
-              onChange={() => setDeleteOption(DeleteOption.moveBeforeActivities)}
+              checked={deleteOption === MoveOption.moveBeforeActivities}
+              onChange={() => setDeleteOption(MoveOption.moveBeforeActivities)}
             />
 
             <Form.Check
               className="me-3"
               type="radio"
               label={'Move After Activities Backward'}
-              checked={deleteOption === DeleteOption.moveAfterActivites}
-              onChange={() => setDeleteOption(DeleteOption.moveAfterActivites)}
+              checked={deleteOption === MoveOption.moveAfterActivites}
+              onChange={() => setDeleteOption(MoveOption.moveAfterActivites)}
             />
           </InputGroup>
         </div>
@@ -61,6 +60,65 @@ export const DeleteActivityConfirmation = (props: { trigger: boolean; onConfirma
           }}
         >
           Delete
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+};
+
+export const AddActivityConfirmation = (props: { trigger: boolean; onConfirmation: (option: MoveOption) => void }) => {
+  const [show, setShow] = useState(false);
+  const [moveOption, setMoveOption] = useState<MoveOption>(MoveOption.moveBeforeActivities);
+  const prevStateRef = useRef(false);
+  useEffect(() => {
+    if (prevStateRef.current !== props.trigger) {
+      handleShow();
+      prevStateRef.current = props.trigger;
+    }
+  }, [props.trigger]);
+
+  const handleClose = () => setShow(false);
+
+  const handleShow = () => setShow(true);
+
+  return (
+    <Modal show={show} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Add Activity</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <div className="d-flex mt-2">
+          <InputGroup>
+            <Form.Check
+              className="me-3"
+              type="radio"
+              label={'Move Before Activities Backward'}
+              checked={moveOption === MoveOption.moveBeforeActivities}
+              onChange={() => setMoveOption(MoveOption.moveBeforeActivities)}
+            />
+
+            <Form.Check
+              className="me-3"
+              type="radio"
+              label={'Move After Activities Forward'}
+              checked={moveOption === MoveOption.moveAfterActivites}
+              onChange={() => setMoveOption(MoveOption.moveAfterActivites)}
+            />
+          </InputGroup>
+        </div>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>
+          Close
+        </Button>
+        <Button
+          variant="primary"
+          onClick={() => {
+            props.onConfirmation(moveOption);
+            handleClose();
+          }}
+        >
+          Add
         </Button>
       </Modal.Footer>
     </Modal>
