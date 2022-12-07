@@ -5,7 +5,7 @@
 
 import { breachMappings } from '../common/BreachMappings';
 import { Activity } from './Activity';
-import { RuleType } from './RuleBreachCounter';
+import { RuleType, Severity } from './RuleBreachCounter';
 
 export interface IDocumentReference {
   /**common name used for the breach */
@@ -19,6 +19,7 @@ export interface ISubBreach {
   description: string;
   /**NHVR document data for the rule*/
   documentReference: IDocumentReference;
+  severity: Severity;
 }
 
 export interface IMainBreach {
@@ -64,6 +65,7 @@ export class SubBreach implements ISubBreach {
   mainBreach: IMainBreach;
   /**activity where the breach happenes */
   activity: Activity;
+  severity: Severity;
   selected = false;
 
   /**@param activity activity where the breach happenes */
@@ -74,6 +76,7 @@ export class SubBreach implements ISubBreach {
     this.documentReference = subBreach.documentReference;
     this.mainBreach = getMainBreachBySubBreachName(subBreach.name);
     this.activity = activity;
+    this.severity = subBreach.severity;
   }
 
   setSelected(select: boolean) {
@@ -81,6 +84,6 @@ export class SubBreach implements ISubBreach {
   }
   /**to remove circular referance when saving the activities */
   public getSaveObject(): ISubBreach {
-    return { name: this.name, description: this.description, documentReference: this.documentReference };
+    return { name: this.name, description: this.description, documentReference: this.documentReference, severity: this.severity };
   }
 }

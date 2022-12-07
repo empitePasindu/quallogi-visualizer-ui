@@ -138,7 +138,7 @@ export class Activity implements IActivity {
       this.endTimeS = du.dateToEpoch(this.endTime);
     }
     this.duration = duration;
-    this.durationStr = this.duration > 0 ? du.secondsToReadable(this.duration) : '0';
+    this.durationStr = this.duration > 0 ? du.secondsToHoursAndMins(this.duration) : '0';
   }
 
   static withDuration(id: number, startTime: string, type: ActivityType, duration: Duration = { days: 0, hours: 0, minutes: 0 }): Activity {

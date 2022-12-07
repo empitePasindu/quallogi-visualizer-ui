@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button, Form, InputGroup, Modal } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { getAllSubBreaches, ISubBreach, SubBreach, SubBreachListItem } from '../models/BreachMapper';
+import { Severity } from '../models/RuleBreachCounter';
 
 export enum MoveOption {
   moveAfterActivites,
@@ -240,6 +241,8 @@ export const AddBreachDialog = (props: { trigger: boolean; onConfirmation: (subB
   const [show, setShow] = useState(false);
   const [breachListItems, setBreachListItems] = useState<SubBreachListItem[]>(getAllSubBreaches());
   const [selectedSubBreachId, setSelectedSubBreachId] = useState<number>(breachListItems.length > 0 ? breachListItems[0].id : 0);
+  const [severity, setSeverity] = useState<Severity>(Severity.minor);
+
   const prevStateRef = useRef(false);
   useEffect(() => {
     if (prevStateRef.current !== props.trigger) {
@@ -261,7 +264,7 @@ export const AddBreachDialog = (props: { trigger: boolean; onConfirmation: (subB
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Save Activity</Modal.Title>
+        <Modal.Title>Save Expected Breach</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="container mt-2">
@@ -275,6 +278,40 @@ export const AddBreachDialog = (props: { trigger: boolean; onConfirmation: (subB
               ))}
             </Form.Select>
             <Form.Label className="mt-3">NHVR REF : {getNhvrName()}</Form.Label>
+            <InputGroup>
+              <Form.Check
+                radioGroup="severity-group"
+                className="me-3"
+                type="radio"
+                label={Severity.getKeyByValue(Severity.minor) as string}
+                checked={severity === Severity.minor}
+                onChange={() => setSeverity(Severity.minor)}
+              />
+              <Form.Check
+                radioGroup="severity-group"
+                className="me-3"
+                type="radio"
+                label={Severity.getKeyByValue(Severity.substantial) as string}
+                checked={severity === Severity.substantial}
+                onChange={() => setSeverity(Severity.substantial)}
+              />
+              <Form.Check
+                radioGroup="severity-group"
+                className="me-3"
+                type="radio"
+                label={Severity.getKeyByValue(Severity.severe) as string}
+                checked={severity === Severity.severe}
+                onChange={() => setSeverity(Severity.severe)}
+              />
+              <Form.Check
+                radioGroup="severity-group"
+                className="me-3"
+                type="radio"
+                label={Severity.getKeyByValue(Severity.critical) as string}
+                checked={severity === Severity.critical}
+                onChange={() => setSeverity(Severity.critical)}
+              />
+            </InputGroup>
           </div>
         </div>
       </Modal.Body>
@@ -287,6 +324,7 @@ export const AddBreachDialog = (props: { trigger: boolean; onConfirmation: (subB
           onClick={() => {
             const subBreachItem = breachListItems.find((sBreach) => sBreach.id === selectedSubBreachId);
             if (subBreachItem) {
+              subBreachItem.subBreach.severity = severity;
               props.onConfirmation(subBreachItem.subBreach);
               handleClose();
             } else {

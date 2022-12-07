@@ -25,6 +25,14 @@ export namespace Severity {
   }
 }
 
+export const colorBySeverity: { [key: number]: string } = {
+  [Severity.zero]: 'lightgreen',
+  [Severity.minor]: 'gold',
+  [Severity.substantial]: 'yellow',
+  [Severity.severe]: 'orange',
+  [Severity.critical]: 'red',
+};
+
 /**Represents the breach counter for a given rule  */
 export interface IRuleBreachCounter {
   /**index of the residing array */

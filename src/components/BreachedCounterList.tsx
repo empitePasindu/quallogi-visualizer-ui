@@ -1,18 +1,10 @@
 import { Activity, ActivityType } from '../models/Activity';
 import { toSimpleDateString } from '../utils/dateUtils';
-import { RuleBreachCounter, Severity } from '../models/RuleBreachCounter';
+import { colorBySeverity, RuleBreachCounter, Severity } from '../models/RuleBreachCounter';
 
 type BreachedCounterProps = {
   breachCounter: RuleBreachCounter[];
   onCounterClick: (breachCounter: RuleBreachCounter) => void;
-};
-
-const colorBySeverity: { [key: number]: string } = {
-  [Severity.zero]: 'lightgreen',
-  [Severity.minor]: 'gold',
-  [Severity.substantial]: 'yellow',
-  [Severity.severe]: 'orange',
-  [Severity.critical]: 'red',
 };
 
 const BreachedCounterItem = (props: { breachCounter: RuleBreachCounter; onClick: (breachCounter: RuleBreachCounter) => void }) => {

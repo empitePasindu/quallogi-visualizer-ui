@@ -20,6 +20,7 @@ export const breachMappings: TBreachMappings = {
             name: '14 Day 84H Work Breach NHVR Rule',
             description: '14 Day NHVR Rule 1 desciption',
           },
+          severity: 0,
         },
       ],
     },

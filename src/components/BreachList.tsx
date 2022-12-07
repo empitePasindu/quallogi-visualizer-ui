@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from 'react';
 import { Activity, ActivityType } from '../models/Activity';
 import { SubBreach } from '../models/BreachMapper';
+import { colorBySeverity, Severity } from '../models/RuleBreachCounter';
 import { toSimpleDateString } from '../utils/dateUtils';
 import { scrollToElement } from '../utils/utils';
 
@@ -22,9 +23,10 @@ const BreachItem = (props: { breach: SubBreach; onClick: (breach: SubBreach) => 
       <div className="row" style={{ backgroundColor: props.breach.selected ? 'lightblue' : '' }}>
         <div className="col-1 bg-border">{props.breach.id}</div>
         {/* <div className="col-5 bg-border">{toSimpleDateString(props.breach.startTime)}</div> */}
-        <div className="col-4 " style={{ backgroundColor: 'lightred' }}>
+        <div className="col" style={{ backgroundColor: 'lightred' }}>
           <div className="d-flex justify-content-around">
             <div>{props.breach.name.toUpperCase()}</div>
+            <div style={{ backgroundColor: colorBySeverity[props.breach.severity] }}>{Severity.getKeyByValue(props.breach.severity) as string}</div>
           </div>
         </div>
         {/* <div className="col-2 bg-border">{props.breach.durationStr}</div> */}
