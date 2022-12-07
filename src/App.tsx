@@ -19,7 +19,7 @@ import { scrollToElement } from './utils/utils';
 import { BreachList } from './components/BreachList';
 import { ISubBreach, SubBreach } from './models/BreachMapper';
 
-type ActivityInputOptions = {
+export type ActivityInputOptions = {
   /**append new activity to bottom*/
   append: boolean;
   /**modify a selected activity */
@@ -52,9 +52,19 @@ function App() {
   const [triggerDeleteConfirmation, setTriggerDeleteConfirmation] = useState(false);
   const [triggerAddBreachDialog, setTriggerAddBreachDialog] = useState(false);
 
-  const addActivity = (startDate: string, type: ActivityType, duration: Duration, moveOption?: MoveOption) => {
+  const addOrModifyActivity = (startDate: string, type: ActivityType, duration: Duration, moveOption?: MoveOption) => {
+    if (inputOptions.modify && activities.length === 0) {
+      toast.info('Create an activity first to modify');
+      return;
+    }
+
+    if (inputOptions.modify && !selectedActivity) {
+      toast.info('Select an activity to modify');
+      return;
+    }
+
     if (duration.days === 0 && duration.hours === 0 && duration.minutes === 0) {
-      toast.error('duration cannot be Zero ');
+      toast.error('Duration cannot be Zero ');
       return;
     }
 
@@ -76,8 +86,28 @@ function App() {
       setActivites([...activities, newActivity]);
       return;
     }
-    console.log('running the selected Activity logic moveOption', moveOption, selectedActivity);
-    //if activity is selected add the new activity and move after activities forward
+
+    //if activity is selected with modify option
+    if (inputOptions.modify) {
+      const selectedActivityIndex = selectedActivity.id;
+      const updatedDuration = du.getSecondsFromDuration(duration);
+      const durationOffset = updatedDuration - selectedActivity.duration;
+      if (durationOffset === 0) toast.info('New and prev durations are same,Nothing to modify');
+      activities.forEach((activity, index) => {
+        if (moveOption === MoveOption.moveBeforeActivities && index < selectedActivityIndex) {
+          activity.moveActivityTimeBy(durationOffset * -1);
+        } else if (moveOption === MoveOption.moveAfterActivites && index > selectedActivityIndex) {
+          activity.moveActivityTimeBy(durationOffset);
+        }
+      });
+      if (moveOption === MoveOption.moveBeforeActivities) selectedActivity.setDuration(updatedDuration, true);
+      else if (moveOption === MoveOption.moveAfterActivites) selectedActivity.setDuration(updatedDuration, false);
+
+      setActivites([...activities]);
+      return;
+    }
+
+    //default -- activity is selected with add or modify option add the new activity
     const beforeActivityIndex = selectedActivity.id;
     const durationSeconds = du.getSecondsFromDuration(duration);
     activities.forEach((activity, index) => {
@@ -144,8 +174,8 @@ function App() {
     setBreaches([...breaches.filter((breach) => breach.id !== selectedBreach.id)]);
   };
 
-  const onActivityAdd = (activityInput: ActivityFormData, moveOption?: MoveOption) => {
-    addActivity(
+  const onActivityAddOrUpdate = (activityInput: ActivityFormData, moveOption?: MoveOption) => {
+    addOrModifyActivity(
       du.localDateToString(activityInput.startDate),
       activityInput.type as ActivityType,
       {
@@ -276,7 +306,7 @@ function App() {
 
   return (
     <>
-      <div className="container" style={{ width: '95vw' }}>
+      <div className="container my-2">
         <div className="row justify-content-start mb-3">
           <div className="col-3 mt-2">
             <InputGroup>
@@ -328,8 +358,9 @@ function App() {
         <div className="row">
           <ActivityForm
             inputActivity={formInputActivity}
-            onSubmit={onActivityAdd}
+            onSubmit={onActivityAddOrUpdate}
             onRemove={removeSelectedActivity}
+            inputOptions={inputOptions}
             disableDateEdit={activities.length !== 0}
             hasSelectedActivity={selectedActivity != null}
             reset={resetForm}

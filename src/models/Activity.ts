@@ -76,33 +76,33 @@ export class Activity implements IActivity {
     this.durationStr = this.duration > 0 ? du.secondsToReadable(this.duration) : '0';
   }
 
-  public setSelected(selected: boolean) {
+  setSelected(selected: boolean) {
     this.selected = selected;
   }
 
-  public getTotalWorkHumanized() {
+  getTotalWorkHumanized() {
     return this.totalWork === 0 ? '' : du.secondsToISO(this.totalWork).replace('P', '').replace('T', '');
   }
-  public getTotalRestHumanized() {
+  getTotalRestHumanized() {
     return this.totalRest === 0 ? '' : du.secondsToISO(this.totalRest).replace('P', '').replace('T', '');
   }
-  public resetTotalDurations() {
+  resetTotalDurations() {
     this.totalRest = 0;
     this.totalWork = 0;
   }
 
-  public addBreach(subBreach: SubBreach) {
+  addBreach(subBreach: SubBreach) {
     this.breaches.push(subBreach);
   }
-  public removeBreach(subBreach: SubBreach) {
+  removeBreach(subBreach: SubBreach) {
     this.breaches = this.breaches.filter((sBreach) => sBreach.id !== subBreach.id);
   }
 
-  public getBreaches() {
+  getBreaches() {
     return this.breaches;
   }
 
-  public hasBreaches() {
+  hasBreaches() {
     return this.breaches.length > 0;
   }
   /**moves the activity(startTime and endTime) forward (duration>0) or backward(duration<0) by the given duration
@@ -110,24 +110,40 @@ export class Activity implements IActivity {
    * keeping its original duration the same.
    *
    */
-  public moveActivityTimeBy(duration: number) {
+  moveActivityTimeBy(duration: number) {
     this.startTime = du.toDateString(du.addSecondsToDate(this.startTime, duration));
     this.startTimeS = du.dateToEpoch(this.startTime);
 
     this.endTime = du.toDateString(du.addSecondsToDate(this.endTime, duration));
     this.endTimeS = du.dateToEpoch(this.endTime);
   }
-  public static withDuration(id: number, startTime: string, type: ActivityType, duration: Duration = { days: 0, hours: 0, minutes: 0 }): Activity {
+  /**
+   * @param duration duration in seconds(=epoch)
+   * @param modifyStartTime if true modifies the endTime to match the new duration else startTime is modified
+   */
+  setDuration(duration: number, modifyStartTime: boolean) {
+    if (modifyStartTime) {
+      this.startTime = du.toDateString(du.addSecondsToDate(this.endTime, -duration));
+      this.startTimeS = du.dateToEpoch(this.startTime);
+    } else {
+      this.endTime = du.toDateString(du.addSecondsToDate(this.startTime, duration));
+      this.endTimeS = du.dateToEpoch(this.endTime);
+    }
+    this.duration = duration;
+    this.durationStr = this.duration > 0 ? du.secondsToReadable(this.duration) : '0';
+  }
+
+  static withDuration(id: number, startTime: string, type: ActivityType, duration: Duration = { days: 0, hours: 0, minutes: 0 }): Activity {
     const endTime = du.toDateString(du.addDurationToDate(startTime, duration));
     const durationMs = du.timeDiff(startTime, endTime);
     return new Activity({ id: id, startTime: startTime, type: type, duration: durationMs, endTime: endTime });
   }
-  public static withEndTime(id: number, startTime: string, type: ActivityType, endTime: string): Activity {
+  static withEndTime(id: number, startTime: string, type: ActivityType, endTime: string): Activity {
     const durationMs = du.timeDiff(startTime, endTime);
     return new Activity({ id: id, startTime: startTime, type: type, duration: durationMs, endTime: endTime });
   }
   /**last activity will have current time as end time */
-  public static asLastActivity(id: number, startTime: string, type: ActivityType): Activity {
+  static asLastActivity(id: number, startTime: string, type: ActivityType): Activity {
     return new Activity({ id: id, startTime: startTime, type: type }, true);
   }
 }

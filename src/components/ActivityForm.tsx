@@ -7,6 +7,7 @@ import { Activity, ActivityType } from '../models/Activity';
 import { useEffect, useState } from 'react';
 import { dateToLocalDate, getDurationFromSeconds, nowTime } from '../utils/dateUtils';
 import { AddActivityConfirmation, DeleteActivityConfirmation, MoveOption } from './Modals';
+import { ActivityInputOptions } from '../App';
 
 type DatePickerProps = {
   name: any;
@@ -56,6 +57,7 @@ export const ActivityForm = (props: {
   disableDateEdit: boolean;
   inputActivity: Activity | undefined;
   hasSelectedActivity: boolean;
+  inputOptions: ActivityInputOptions;
   reset: boolean;
   onSubmit: (data: ActivityFormData, moveOption?: MoveOption) => void;
   onRemove: (moveOption: MoveOption) => void;
@@ -171,17 +173,17 @@ export const ActivityForm = (props: {
               </div>
             </Form.Group>
             <Form.Group className="row mb-3">
-              <div className="col-3 d-flex justify-content-around offset-sm-2">
+              <div className="col d-flex offset-sm-2">
                 <Button
                   variant="primary"
-                  className="btn btn-primary"
+                  className="btn btn-primary me-2"
                   onClick={() => {
                     handleSubmit();
                   }}
                 >
-                  Add activity
+                  {props.inputOptions.append ? 'Add Activity' : 'Modifiy Activity'}
                 </Button>
-                <Button variant="danger" onClick={() => setTriggerDeleteConfirmation((val) => !val)} disabled={!props.hasSelectedActivity}>
+                <Button variant="danger" onClick={() => setTriggerDeleteConfirmation((val) => !val)} disabled={!props.hasSelectedActivity || props.inputOptions.modify}>
                   Delete Activity
                 </Button>
               </div>
