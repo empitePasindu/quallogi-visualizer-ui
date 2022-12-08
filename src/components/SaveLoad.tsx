@@ -128,8 +128,8 @@ export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[];
 
   const processUploaded = (data: any) => {
     try {
-      console.log('processUploaded-start', jsonData);
-      const { finalActivities, finalBreaches } = mapBaseActivities(jsonData.activities);
+      console.log('processUploaded-start', data);
+      const { finalActivities, finalBreaches } = mapBaseActivities(data.activities);
       props.onActivitesLoaded(finalActivities, finalBreaches);
       toast.success('Load Activities success');
     } catch (e) {

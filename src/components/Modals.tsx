@@ -276,7 +276,7 @@ export const LoadActivityFileConfirmation = (props: { fileNames: string[]; trigg
     try {
       const jsonData = JSON.parse(data);
       setMetaData({ description: jsonData.description, subBreachName: jsonData.subBreachName });
-      props.onDataUpload(data);
+      props.onDataUpload(jsonData);
       setUploadFileSelected(true);
     } catch (e) {
       setUploadFileSelected(false);
