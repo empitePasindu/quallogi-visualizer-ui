@@ -3,9 +3,15 @@ import { Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { Activity, IBaseActivity } from '../models/Activity';
 import { dateToEpoch } from '../utils/dateUtils';
-import { LoadActivityFileConfirmation, SaveActivityAsFileConfirmation } from './Modals';
+import { LoadActivityFileConfirmation, SaveActivitiesMetaData, SaveActivityAsFileConfirmation } from './Modals';
 import { getActivityFileNames, getActivityList, saveActivitiesList } from '../services/FatigueApi';
 import { SubBreach } from '../models/BreachMapper';
+
+export type ActivitiesSaveFormat = {
+  activities: IBaseActivity[];
+  description?: string;
+  subBreachName?: string;
+};
 
 export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[]; onActivitesLoaded: (activities: Activity[], breaches: SubBreach[]) => void }) => {
   const [triggerSave, setTriggerSave] = useState(false);
@@ -69,7 +75,7 @@ export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[];
       //-------breach mapping---------
       if (bActivity.breaches) {
         bActivity.breaches.forEach((breach) => {
-          const subBreach = new SubBreach(breachCounter, breach, activity);
+          const subBreach = SubBreach.fromName(breachCounter, breach.name, activity);
           finalBreaches.push(subBreach);
           activity.addBreach(subBreach);
           breachCounter++;
@@ -80,7 +86,8 @@ export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[];
     return { finalActivities, finalBreaches };
   };
 
-  const saveActivities = (fileName: string) => {
+  const saveActivities = (data: SaveActivitiesMetaData, download = false) => {
+    const { fileName, description, subBreachName } = data;
     const lastActivityIndex = props.activities.length - 1;
     const savingActivities: IBaseActivity[] = props.activities.map((act, index): IBaseActivity => {
       if (lastActivityIndex !== index || (lastActivityIndex === index && !act.endTime))
@@ -88,7 +95,19 @@ export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[];
       //add endTime for lastActivity for reference when loading back to get the correct duration
       else return { startTime: act.startTime, endTime: act.endTime, type: act.type, breaches: act.breaches ? act.breaches.map((b) => b.getSaveObject()) : undefined };
     });
-    saveActivitiesList(savingActivities, fileName)
+
+    const saveData = {
+      activities: savingActivities,
+      description,
+      subBreachName,
+    };
+
+    if (download) {
+      exportData(saveData, fileName);
+      toast.success('Download Success');
+      return;
+    }
+    saveActivitiesList(saveData, fileName)
       .then((res) => {
         toast.success('File Saved Successfully');
       })
@@ -96,6 +115,27 @@ export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[];
         toast.error('File Save Failed');
         console.log('save failed', er);
       });
+  };
+
+  const exportData = (data: any, fileName: string) => {
+    const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(JSON.stringify(data, null, 2))}`;
+    const link = document.createElement('a');
+    link.href = jsonString;
+    link.download = fileName + '.json';
+
+    link.click();
+  };
+
+  const processUploaded = (data: any) => {
+    try {
+      console.log('processUploaded-start', jsonData);
+      const { finalActivities, finalBreaches } = mapBaseActivities(jsonData.activities);
+      props.onActivitesLoaded(finalActivities, finalBreaches);
+      toast.success('Load Activities success');
+    } catch (e) {
+      toast.error('file upload failed');
+      console.log('error occurred while processing uploaded', e);
+    }
   };
 
   return (
@@ -114,7 +154,7 @@ export const SaveLoad = (props: { triggerReset: boolean; activities: Activity[];
         </Button>
       </div>
       <SaveActivityAsFileConfirmation trigger={triggerSave} onConfirmation={saveActivities} />
-      <LoadActivityFileConfirmation trigger={triggerLoad} fileNames={fileNames} onConfirmation={loadActivities} />
+      <LoadActivityFileConfirmation trigger={triggerLoad} fileNames={fileNames} onConfirmation={loadActivities} onDataUpload={processUploaded} />
     </>
   );
 };
