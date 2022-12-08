@@ -49,6 +49,12 @@ export const getAllSubBreaches = (): SubBreachListItem[] => {
   return subBreaches;
 };
 
+export const getISubBreachByName = (subBreachName: string): ISubBreach => {
+  const subBreachItem = getAllSubBreaches().find((sb) => sb.subBreach.name === subBreachName);
+  if (!subBreachItem) throw Error('getSubBreachByName:: no subBreach with name ' + subBreachName);
+  return subBreachItem.subBreach;
+};
+
 const getMainBreachBySubBreachName = (subBreachName: string) => {
   const mainBreach = mainBreaches.find((mb) => mb.subBreaches.find((sb) => sb.name === subBreachName));
   if (!mainBreach) throw Error('getMainBreachBySubBreachName::could not find mainBreach by subBreachName,' + subBreachName);
@@ -82,8 +88,13 @@ export class SubBreach implements ISubBreach {
   setSelected(select: boolean) {
     this.selected = select;
   }
+
   /**to remove circular referance when saving the activities */
   public getSaveObject(): ISubBreach {
     return { name: this.name, description: this.description, documentReference: this.documentReference, severity: this.severity };
+  }
+
+  static fromName(id: number, subBreachName: string, activity: Activity) {
+    return new SubBreach(id, getISubBreachByName(subBreachName), activity);
   }
 }

@@ -103,7 +103,7 @@ function App() {
       });
       if (moveOption === MoveOption.moveBeforeActivities) selectedActivity.setDuration(updatedDuration, true);
       else if (moveOption === MoveOption.moveAfterActivites) selectedActivity.setDuration(updatedDuration, false);
-
+      selectedActivity.type = type;
       setActivites([...activities]);
       return;
     }

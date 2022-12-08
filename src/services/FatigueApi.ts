@@ -1,3 +1,4 @@
+import { ActivitiesSaveFormat } from '../components/SaveLoad';
 import { Activity, IActivity, IBaseActivity } from '../models/Activity';
 
 const BASE_URL = 'http://localhost:3300/';
@@ -5,6 +6,7 @@ const GET_BREACHES_API = BASE_URL + 'get-breaches';
 const ACTIVITY_FILE_NAMES_API = BASE_URL + 'get-activity-file-names';
 const SAVE_ACTIVITY_API = BASE_URL + 'save-activity';
 const GET_ACTIVITY_LIST_API = BASE_URL + 'get-activity-list';
+const GET_ACTIVITY_LIST_META_DATA_API = BASE_URL + 'get-meta-data-by-file-name';
 
 /**extrac work causes breaches */
 export type Breach = {
@@ -116,10 +118,10 @@ export async function getActivityFileNames(): Promise<string[]> {
   }
 }
 /**saves activities as json file with the given fileName */
-export async function saveActivitiesList(activities: IBaseActivity[], fileName: string) {
+export async function saveActivitiesList(activities: ActivitiesSaveFormat, fileName: string) {
   const response = await fetch(SAVE_ACTIVITY_API, {
     method: 'POST',
-    body: JSON.stringify({ activities: activities, fileName: fileName }),
+    body: JSON.stringify({ data: activities, fileName }),
     headers: {
       'Content-Type': 'application/json',
     },
@@ -145,6 +147,21 @@ export async function getActivityList(fileName: string): Promise<IBaseActivity[]
     return Promise.resolve(data.activities);
   } else {
     throw Error('Fatigue API getActivityList Request failed');
+  }
+}
+
+export async function getActivityListMetaData(fileName: string): Promise<{ description?: string; subBreachName?: string }> {
+  const response = await fetch(GET_ACTIVITY_LIST_META_DATA_API + '?fileName=' + fileName, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  const data = await response.json();
+  if (response.ok) {
+    return Promise.resolve(data);
+  } else {
+    throw Error('Fatigue API getActivityListMetaData Request failed');
   }
 }
 

@@ -15,7 +15,7 @@ export const breachMappings: TBreachMappings = {
       subBreaches: [
         {
           name: '84 Hour',
-          description: '84 Hour rule',
+          description: '24 continuous hours stationary rest time taken after no more than 84 hours work time',
           documentReference: {
             name: '14 Day 84H Work Breach NHVR Rule',
             description: '14 Day NHVR Rule 1 desciption',
